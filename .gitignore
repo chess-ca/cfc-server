@@ -1,0 +1,31 @@
+
+#---- Built files
+built/
+built.*
+
+#---- Hugo
+hugo/public/
+!hugo/public/robots.txt
+hugo/themes/*
+!hugo/themes/cfc-2020
+
+
+#---- Google App Engine (GAE) / Python / Flask
+gae/static-generated/
+gae/vendor/
+*.py[cod]
+__pycache__/
+*$py.class
+
+
+#---- x-dev / Developer Stuff
+node_modules/
+/x-dev/builds/
+/x-dev/sandbox/
+
+#---- IDE (IntelliJ)
+/.idea/
+/BNC-Blog.iml
+
+#---- Specific Files
+/tdlist-api.config
