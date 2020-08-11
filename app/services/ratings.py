@@ -69,6 +69,9 @@ def get_tournament_crosstable(tid, tournament_keys=None, crosstable_keys=None):
             rsp['tournament'] = None
         else:
             app.dao.ratings.tournament.get_crosstable_for_tournament(db, t)
+            for i, ce in enumerate(t.crosstable):
+                new_ce = {key: getattr(ce, key) for key in ct_keys}
+                t.crosstable[i] = new_ce
             rsp['tournament'] = {key: getattr(t, key) for key in t_keys}
 
     return rsp
