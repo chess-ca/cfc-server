@@ -1,0 +1,18 @@
+{
+  "name": "cfc-server",
+  "version": "1.0.0",
+  "description": "CFC / server.chess.ca",
+  "main": "wsgi.py",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "flask:run": "cd .. && set FLASK_ENV=development && venv\\scripts\\activate.bat && python wsgi.py"
+  },
+  "author": "Don Parakin",
+  "license": "COPYRIGHT",
+  "dependencies": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/parakin/cfc-server.git"
+  }
+}

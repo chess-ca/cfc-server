@@ -1,4 +1,6 @@
 
+private/
+
 #---- Built files
 built/
 built.*
@@ -22,10 +24,10 @@ __pycache__/
 node_modules/
 /x-dev/builds/
 /x-dev/sandbox/
+venv/
 
 #---- IDE (IntelliJ)
 /.idea/
 /BNC-Blog.iml
 
 #---- Specific Files
-/tdlist-api.config
