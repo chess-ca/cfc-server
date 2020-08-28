@@ -1,19 +1,21 @@
 
-import configparser, pathlib
+import os
+from pathlib import Path
 import bnc4py.py.config as bnc_config
 
-_root_dir = pathlib.Path(__file__).parents[2]
-_app_config_file = str(_root_dir / 'private' / 'config' / 'app.config')
+_root_dir = Path(__file__).parents[2]
+_app_config_dir = Path(os.environ['APP_CONFIG_DIR'])
+_app_data_dir = Path(os.environ['APP_DATA_DIR'])
 
 
 class BaseConfig(bnc_config.BaseConfig):
-    BNC_CONFIG_CONFIGPARSER_FILES =  _app_config_file
+    BNC_CONFIG_CONFIGPARSER_FILES = str(_app_config_dir / 'app.config')
 
     ROOT_DIR = str(_root_dir)
-    CONFIG_DIR = str(_root_dir / 'private' / 'config')
-    DATA_DIR = str(_root_dir / 'private' / 'data')
+    CONFIG_DIR = str(_app_config_dir)
+    DATA_DIR = str(_app_data_dir)
 
-    RATINGS_DB = str(_root_dir / 'private' / 'data' / 'cfc.ratings.sqlite')
+    RATINGS_DB = str(_app_data_dir / 'cfc.ratings.sqlite')
     RATINGS_CACHE_MAXAGE = 600
 
 

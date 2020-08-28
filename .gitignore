@@ -24,6 +24,7 @@ __pycache__/
 node_modules/
 /x-dev/builds/
 /x-dev/sandbox/
+/lib/
 venv/
 
 #---- IDE (IntelliJ)

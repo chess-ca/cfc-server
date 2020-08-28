@@ -13,7 +13,6 @@ class CrosstableEntry:
     # ---- Crosstable Entry
     place: int
     m_id: int
-    m_name: str
     results: str
     score: float
     games_played: int
@@ -21,6 +20,7 @@ class CrosstableEntry:
     rating_perf: int
     rating_post: int
     rating_hi: int
+    m_name: str = field(default='')
 
     def __post_init__(self):
         pass

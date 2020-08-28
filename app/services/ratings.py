@@ -56,7 +56,7 @@ def get_tournament_crosstable(tid, tournament_keys=None, crosstable_keys=None):
     t_keys = tournament_keys or \
         't_id name last_day prov rounds pairings type org_m_id org_name crosstable'
     ct_keys = crosstable_keys or \
-        'place m_id m_name rating_pre rating_perf rating_post rating_hi score results'
+        'place m_id m_name games_played score results rating_pre rating_perf rating_post rating_hi'
     t_keys = t_keys.split()
     ct_keys = ct_keys.split()
 
