@@ -1,29 +1,20 @@
 
-import flask as f
+import flask
 import app
-
-_maxage = app.config.RATINGS_CACHE_MAXAGE
+from ui_api.shared import api_response
 
 
 def find():
-    mid = f.request.args.get('mid', None)
-    first = f.request.args.get('first', None)
-    last = f.request.args.get('last', None)
+    mid = flask.request.args.get('mid', None)
+    first = flask.request.args.get('first', None)
+    last = flask.request.args.get('last', None)
 
     rsp = app.services.ratings.find_players(mid, first, last)
     rsp = dict(apicode=0, error='', **rsp)
-
-    ro = f.make_response(rsp)
-    ro.headers['Cache-Control'] = f'public, max-age={_maxage}, must-revalidate'
-    ro.headers['Access-Control-Allow-Origin'] = '*'
-    return ro
+    return api_response(rsp)
 
 
 def get_details(mid):
     rsp = app.services.ratings.get_player_details(mid)
     rsp = dict(apicode=0, error='', **rsp)
-
-    ro = f.make_response(rsp)
-    ro.headers['Cache-Control'] = f'public, max-age={_maxage}, must-revalidate'
-    ro.headers['Access-Control-Allow-Origin'] = '*'
-    return ro
+    return api_response(rsp)

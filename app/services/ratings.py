@@ -75,3 +75,60 @@ def get_tournament_crosstable(tid, tournament_keys=None, crosstable_keys=None):
             rsp['tournament'] = {key: getattr(t, key) for key in t_keys}
 
     return rsp
+
+
+def find_tournaments(name, tournament_keys=None):
+    t_keys = tournament_keys or \
+        't_id name last_day prov pairings type org_name'
+    t_keys = t_keys.split()
+
+    rsp=dict()
+    with app.RATINGS_DB() as db:
+        rsp['dbdate'] = app.dao.ratings.metadata.get_key(db, 'created')
+
+        t_iter = app.dao.ratings.tournament.getall_name(db, name)
+        tournament_list = []
+        for t in t_iter:
+            t = {key: getattr(t, key) for key in t_keys}
+            tournament_list.append(t)
+        rsp['tournaments'] = tournament_list
+
+    return rsp
+
+
+def find_tournaments_days(days, tournament_keys=None):
+    t_keys = tournament_keys or \
+             't_id name last_day prov pairings type org_name'
+    t_keys = t_keys.split()
+
+    rsp=dict()
+    with app.RATINGS_DB() as db:
+        rsp['dbdate'] = app.dao.ratings.metadata.get_key(db, 'created')
+
+        t_iter = app.dao.ratings.tournament.getall_lastdays(db, days)
+        tournament_list = []
+        for t in t_iter:
+            t = {key: getattr(t, key) for key in t_keys}
+            tournament_list.append(t)
+        rsp['tournaments'] = tournament_list
+
+    return rsp
+
+
+def find_tournaments_year(year, tournament_keys=None):
+    t_keys = tournament_keys or \
+             't_id name last_day prov pairings type org_name'
+    t_keys = t_keys.split()
+
+    rsp=dict()
+    with app.RATINGS_DB() as db:
+        rsp['dbdate'] = app.dao.ratings.metadata.get_key(db, 'created')
+
+        t_iter = app.dao.ratings.tournament.getall_year(db, year)
+        tournament_list = []
+        for t in t_iter:
+            t = {key: getattr(t, key) for key in t_keys}
+            tournament_list.append(t)
+        rsp['tournaments'] = tournament_list
+
+    return rsp

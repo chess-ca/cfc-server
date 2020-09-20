@@ -10,8 +10,12 @@ rd.set_rule_prefix('/api/ratings')
 rd.set_import_prefix('ui_api.ratings.')
 rd.add_url_rules([
     ('/player/find', 'player.find'),
+    # ('/player/prov/<prov>', 'player.province'),
     ('/player/<int:mid>', 'player.get_details'),
     ('/tournament/<int:tid>', 'tournament.get_details'),
+    ('/tournament/find', 'tournament.find'),
+    ('/tournament/days/<int:days>', 'tournament.days'),
+    ('/tournament/year/<int:year>', 'tournament.year'),
 ])
 
 

@@ -1,6 +1,7 @@
 
 import bnc4py.db.database as bnc_db
 import app
+import datetime
 
 
 def get_tid(db: bnc_db.Database, tid):
@@ -43,3 +44,46 @@ def get_crosstable_for_tournament(db: bnc_db.Database, tournament):
     for row in rowset:
         ce = db.row_to_dataclass(row, app.models.CrosstableEntry)
         tournament.crosstable.append(ce)
+
+
+def getall_name(db: bnc_db.Database, name):
+    name = '%' + str(name).strip('* ').replace('*', '%') + '%'
+    sql = """
+    SELECT t.*, p.first||' '||p.last AS org_name
+        FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
+        WHERE t.name LIKE ? COLLATE NOCASE
+        ORDER BY t.last_day DESC
+        LIMIT 1000
+    """
+    for row in db.fetchrows(sql, [name]):
+        yield db.row_to_dataclass(row, app.models.Tournament)
+
+
+def getall_lastdays(db: bnc_db.Database, days):
+    try: days = int(days)
+    except ValueError: return   # zero tournaments if days is invalid
+    date_from = (datetime.date.today() - datetime.timedelta(days=days)).strftime('%Y-%m-%d')
+    sql = """
+    SELECT t.*, p.first||' '||p.last AS org_name
+        FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
+        WHERE t.last_day >= ?
+        ORDER BY t.last_day DESC
+        LIMIT 2000
+    """
+    for row in db.fetchrows(sql, [date_from]):
+        yield db.row_to_dataclass(row, app.models.Tournament)
+
+
+def getall_year(db: bnc_db.Database, year):
+    try: year = int(year)
+    except ValueError: return   # zero tournaments if days is invalid
+    year_range = [f'{year}-00-00', f'{year}-99-99']
+    sql = """
+    SELECT t.*, p.first||' '||p.last AS org_name
+        FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
+        WHERE t.last_day >= ? AND t.last_day <= ?
+        ORDER BY t.last_day DESC
+        LIMIT 2000
+    """
+    for row in db.fetchrows(sql, year_range):
+        yield db.row_to_dataclass(row, app.models.Tournament)

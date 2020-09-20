@@ -31,7 +31,7 @@ def getall_name(db: bnc_db.Database, first=None, last=None):
             first = first.replace('*', '%')
         sqldata.append(first.lower())
 
-    sql = 'SELECT * FROM player WHERE ### ORDER BY last_lc'
+    sql = 'SELECT * FROM player WHERE ### ORDER BY last_lc LIMIT 1000'
     sql = sql.replace('###', ' AND '.join(where))
     rowset = db.fetchrows(sql, sqldata)
     for row in rowset:
