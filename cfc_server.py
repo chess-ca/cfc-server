@@ -2,6 +2,10 @@
 import sys, os
 from pathlib import Path
 
+if sys.hexversion < 0x03070000:
+    # App needs Python 3.7+ for dataclasses,
+    sys.exit('FATAL: Python version 3.7 or later is required by this app.')
+
 # ---- Add this deploy's libraries to Python's path
 _py_version = f'{sys.version_info[0]}.{sys.version_info[1]}'
 _root_dir = Path(__file__).parent
@@ -10,6 +14,7 @@ if not _pylib_dir.exists():
     print(f'ERROR: Python library directory not found: {_pylib_dir}')
     exit(9903)
 sys.path.insert(0, str(_pylib_dir))
+sys.path.insert(0, str(_root_dir))
 
 # ---- Add environment variables (required before importing app)
 if __name__ == '__main__':

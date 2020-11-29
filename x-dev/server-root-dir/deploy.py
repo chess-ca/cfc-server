@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess, shutil, configparser
 
-_py_version = '3.8'
+_py_version = '3.9'
 _git_repos = 'https://gitlab.com/parakin/cfc-server.git'
 
 _prefix = 'deploy-'
@@ -18,8 +18,8 @@ def main():
     deploy_dir = get_next_deploy_dir()
     git_clone(deploy_dir)
     pip_install(deploy_dir)
-    set_current_deploy_dir(deploy_dir)
-    # restart_apache2()
+    set_current_deploy(deploy_dir)
+    reload_uwsgi()
 
 
 def get_next_deploy_dir():
@@ -54,14 +54,16 @@ def pip_install(deploy_dir):
     cp.check_returncode()
 
 
-def set_current_deploy_dir(deploy_dir):
-    with open(str(_current_deploy_file), 'w') as f:
-        f.write(deploy_dir)
+def set_current_deploy(deploy_dir):
+    print('---- ---- ---- ---- set ./deployed -> ./' + deploy_dir)
+    cmd = ['ln', '-fns', deploy_dir, 'deployed']
+    cp = subprocess.run(cmd)
+    cp.check_returncode()
 
 
-def restart_apache2():
-    print('---- ---- ---- ---- Apache: restart')
-    cmd = [str(Path(_project_dir, 'apache2', 'bin', 'restart'))]
+def reload_uwsgi():
+    print('---- ---- ---- ---- uwsgi: reload')
+    cmd = ['touch', 'touch-to-reload.txt']
     cp = subprocess.run(cmd)
     cp.check_returncode()
 
