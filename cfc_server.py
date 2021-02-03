@@ -2,8 +2,8 @@
 import sys, os
 from pathlib import Path
 
-if sys.hexversion < 0x03070000:
-    # App needs Python 3.7+ for dataclasses,
+if sys.version_info < (3,7):
+    # App needs Python 3.7+ (dataclasses, ...)
     sys.exit('FATAL: Python version 3.7 or later is required by this app.')
 
 # ---- Add this deploy's libraries to Python's path
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
 # ---- Flask start-up
 from flask import Flask
-import app, ui_api, ui_html
+import cfcserver, ui_api, ui_http
 
 flask_app = Flask(__name__.split('.')[0])
 application = flask_app       # for mod_wsgi
@@ -33,9 +33,9 @@ application = flask_app       # for mod_wsgi
 is_prod = (__name__ != '__main__')
 flask_app.config['JSON_SORT_KEYS'] = False
 
-app.initialize(is_prod)
+cfcserver.initialize(is_prod)
 ui_api.initialize(flask_app)
-ui_html.initialize(flask_app)
+ui_http.initialize(flask_app)
 
 if __name__ == '__main__':
     flask_app.run(debug=True)

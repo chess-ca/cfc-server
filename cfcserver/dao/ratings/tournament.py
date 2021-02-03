@@ -1,6 +1,6 @@
 
 import bnc4py.db.database as bnc_db
-import app
+import cfcserver
 import datetime
 
 
@@ -12,7 +12,7 @@ def get_tid(db: bnc_db.Database, tid):
     """
     row = db.fetchone(sql, [tid])
     return None if not row \
-        else db.row_to_dataclass(row, app.models.Tournament)
+        else db.row_to_dataclass(row, cfcserver.models.Tournament)
 
 
 def get_for_player(db: bnc_db.Database, player):
@@ -26,7 +26,7 @@ def get_for_player(db: bnc_db.Database, player):
     player.tournaments = []
     rowset = db.fetchrows(sql, [player.m_id])
     for row in rowset:
-        ce = db.row_to_dataclass(row, app.models.CrosstableEntry)
+        ce = db.row_to_dataclass(row, cfcserver.models.CrosstableEntry)
         player.tournaments.append(ce)
 
 
@@ -42,7 +42,7 @@ def get_crosstable_for_tournament(db: bnc_db.Database, tournament):
     tournament.crosstable = []
     rowset = db.fetchrows(sql, [tournament.t_id])
     for row in rowset:
-        ce = db.row_to_dataclass(row, app.models.CrosstableEntry)
+        ce = db.row_to_dataclass(row, cfcserver.models.CrosstableEntry)
         tournament.crosstable.append(ce)
 
 
@@ -56,7 +56,7 @@ def getall_name(db: bnc_db.Database, name):
         LIMIT 1000
     """
     for row in db.fetchrows(sql, [name]):
-        yield db.row_to_dataclass(row, app.models.Tournament)
+        yield db.row_to_dataclass(row, cfcserver.models.Tournament)
 
 
 def getall_lastdays(db: bnc_db.Database, days):
@@ -71,7 +71,7 @@ def getall_lastdays(db: bnc_db.Database, days):
         LIMIT 2000
     """
     for row in db.fetchrows(sql, [date_from]):
-        yield db.row_to_dataclass(row, app.models.Tournament)
+        yield db.row_to_dataclass(row, cfcserver.models.Tournament)
 
 
 def getall_year(db: bnc_db.Database, year):
@@ -86,4 +86,4 @@ def getall_year(db: bnc_db.Database, year):
         LIMIT 2000
     """
     for row in db.fetchrows(sql, year_range):
-        yield db.row_to_dataclass(row, app.models.Tournament)
+        yield db.row_to_dataclass(row, cfcserver.models.Tournament)

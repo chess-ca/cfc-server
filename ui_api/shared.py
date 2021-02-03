@@ -1,9 +1,9 @@
 
 import flask
-import app
+import cfcserver
 
 def api_response(data):
-    _maxage = app.config.RATINGS_CACHE_MAXAGE
+    _maxage = cfcserver.config.RATINGS_CACHE_MAXAGE
     ro = flask.make_response(data)
     ro.headers['Cache-Control'] = f'public, max-age={_maxage}, must-revalidate'
     ro.headers['Access-Control-Allow-Origin'] = '*'

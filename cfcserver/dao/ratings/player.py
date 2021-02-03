@@ -1,14 +1,14 @@
 
 from dataclasses import fields
 import bnc4py.db.database as bnc_db
-import app
+import cfcserver
 
 
 def get_mid(db: bnc_db.Database, mid):
     sql = 'SELECT * FROM player WHERE m_id=?'
     row = db.fetchone(sql, [mid])
     return None if not row \
-        else db.row_to_dataclass(row, app.models.Player)
+        else db.row_to_dataclass(row, cfcserver.models.Player)
 
 
 def getall_name(db: bnc_db.Database, first=None, last=None):
@@ -35,4 +35,4 @@ def getall_name(db: bnc_db.Database, first=None, last=None):
     sql = sql.replace('###', ' AND '.join(where))
     rowset = db.fetchrows(sql, sqldata)
     for row in rowset:
-        yield db.row_to_dataclass(row, app.models.Player)
+        yield db.row_to_dataclass(row, cfcserver.models.Player)

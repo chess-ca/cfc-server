@@ -1,5 +1,6 @@
 
 private/
+app_local/
 
 #---- Built files
 built/

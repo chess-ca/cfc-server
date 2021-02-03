@@ -5,6 +5,9 @@ For technical notes, see
 
 ## Setup
 
+* IDE Settings:
+  * Use Unix/Mac line endings (\n). Intellij: File > Settings > Editor > Code Style: line separator.
+
 ### Apache and mod_wsgi
 apached/conf/httpd.conf:
 ```text
