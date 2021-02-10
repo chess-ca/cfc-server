@@ -18,16 +18,15 @@ def main():
         cfcserver.initialize(is_prod=True)
     else:
         _set_environ_vars(root_dir)
+        import cfcserver
+        cfcserver.initialize(is_prod='--dev' not in sys.argv)
         if len(sys.argv) <= 1:
             # ---- Start Flask in Dev/Local
             application = _start_flask()
-            import cfcserver
-            cfcserver.initialize(is_prod=False)
             application.run(debug=True)
         else:
             # ---- Start Command Line
-            import cfcserver, ui_cli
-            cfcserver.initialize(is_prod='--dev' not in sys.argv)
+            import ui_cli
             ui_cli.application.run()
 
 
@@ -48,8 +47,9 @@ def _add_to_python_path(root_dir):
 
 def _set_environ_vars(root_dir):    # For Development
     os.environ.update(
-        APP_CONFIG_DIR=str(root_dir / 'private' / 'config'),
-        APP_DATA_DIR=str(root_dir / 'private' / 'data'),
+        APP_CONFIG_DIR=str(root_dir / 'app_local' / 'config'),
+        APP_DATA_DIR=str(root_dir / 'app_local' / 'data'),
+        APP_JOBS_DIR=str(root_dir / 'app_local' / 'jobs'),
     )
 
 

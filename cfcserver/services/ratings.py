@@ -10,7 +10,7 @@ def find_players(mid, first, last, player_keys=None):
 
     rsp = dict()
     with cfcserver.RATINGS_DB() as db:
-        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'created')
+        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'updated_text')
 
         if mid:
             p = cfcserver.dao.ratings.player.get_mid(db, mid)
@@ -37,7 +37,7 @@ def get_player_details(mid, player_keys=None, tournament_keys=None, crosstable_k
 
     rsp = dict()
     with cfcserver.RATINGS_DB() as db:
-        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'created')
+        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'updated_text')
 
         player = cfcserver.dao.ratings.player.get_mid(db, mid)
         if not player:
@@ -62,7 +62,7 @@ def get_tournament_crosstable(tid, tournament_keys=None, crosstable_keys=None):
 
     rsp = dict()
     with cfcserver.RATINGS_DB() as db:
-        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'created')
+        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'updated_text')
 
         t = cfcserver.dao.ratings.tournament.get_tid(db, tid)
         if not t:
@@ -84,7 +84,7 @@ def find_tournaments(name, tournament_keys=None):
 
     rsp=dict()
     with cfcserver.RATINGS_DB() as db:
-        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'created')
+        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'updated_text')
 
         t_iter = cfcserver.dao.ratings.tournament.getall_name(db, name)
         tournament_list = []
@@ -103,7 +103,7 @@ def find_tournaments_days(days, tournament_keys=None):
 
     rsp=dict()
     with cfcserver.RATINGS_DB() as db:
-        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'created')
+        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'updated_text')
 
         t_iter = cfcserver.dao.ratings.tournament.getall_lastdays(db, days)
         tournament_list = []
@@ -122,7 +122,7 @@ def find_tournaments_year(year, tournament_keys=None):
 
     rsp=dict()
     with cfcserver.RATINGS_DB() as db:
-        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'created')
+        rsp['dbdate'] = cfcserver.dao.ratings.metadata.get_key(db, 'updated_text')
 
         t_iter = cfcserver.dao.ratings.tournament.getall_year(db, year)
         tournament_list = []

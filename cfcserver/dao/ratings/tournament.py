@@ -4,7 +4,7 @@ import cfcserver
 import datetime
 
 
-def get_tid(db: bnc_db.Database, tid):
+def get_tid(db: bnc_db.GenericDatabase, tid):
     sql = """
     SELECT t.*, p.first||' '||p.last AS org_name
         FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
@@ -15,7 +15,7 @@ def get_tid(db: bnc_db.Database, tid):
         else db.row_to_dataclass(row, cfcserver.models.Tournament)
 
 
-def get_for_player(db: bnc_db.Database, player):
+def get_for_player(db: bnc_db.GenericDatabase, player):
     sql = f"""
     SELECT t.*, ct.*
         FROM tournament AS t
@@ -30,7 +30,7 @@ def get_for_player(db: bnc_db.Database, player):
         player.tournaments.append(ce)
 
 
-def get_crosstable_for_tournament(db: bnc_db.Database, tournament):
+def get_crosstable_for_tournament(db: bnc_db.GenericDatabase, tournament):
     sql = """
     SELECT t.*, ct.*, p.last||', '||p.first AS m_name
         FROM tournament AS t
@@ -46,7 +46,7 @@ def get_crosstable_for_tournament(db: bnc_db.Database, tournament):
         tournament.crosstable.append(ce)
 
 
-def getall_name(db: bnc_db.Database, name):
+def getall_name(db: bnc_db.GenericDatabase, name):
     name = '%' + str(name).strip('* ').replace('*', '%') + '%'
     sql = """
     SELECT t.*, p.first||' '||p.last AS org_name
@@ -59,7 +59,7 @@ def getall_name(db: bnc_db.Database, name):
         yield db.row_to_dataclass(row, cfcserver.models.Tournament)
 
 
-def getall_lastdays(db: bnc_db.Database, days):
+def getall_lastdays(db: bnc_db.GenericDatabase, days):
     try: days = int(days)
     except ValueError: return   # zero tournaments if days is invalid
     date_from = (datetime.date.today() - datetime.timedelta(days=days)).strftime('%Y-%m-%d')
@@ -74,7 +74,7 @@ def getall_lastdays(db: bnc_db.Database, days):
         yield db.row_to_dataclass(row, cfcserver.models.Tournament)
 
 
-def getall_year(db: bnc_db.Database, year):
+def getall_year(db: bnc_db.GenericDatabase, year):
     try: year = int(year)
     except ValueError: return   # zero tournaments if days is invalid
     year_range = [f'{year}-00-00', f'{year}-99-99']
