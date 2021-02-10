@@ -70,6 +70,7 @@ def _insert_metadata(db, job_dir):
 
 def _insert_members(db, job_dir):
     log.info('Loading member data:')
+    log.info('... directory: %s', job_dir)
     for data_fp in job_dir.glob('members.*.csv'):
         n = dao_ratings.load_members_from_csv(db, data_fp)
         log.info(f'... loaded data from {data_fp.name} ({n:,})')
@@ -78,7 +79,7 @@ def _insert_members(db, job_dir):
 
 
 def _insert_historical_events(db):
-    historical_dir = Path(db.db_directory, 'historical')
+    historical_dir = Path(db.db_directory, 'historical').resolve()
     log.info('Loading historical events data:')
     log.info('... directory: %s', historical_dir)
     for data_fp in historical_dir.glob('ratings.*.events.csv'):

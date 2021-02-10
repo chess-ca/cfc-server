@@ -3,11 +3,23 @@
 For technical notes, see
 [GDOC](https://docs.google.com/document/d/11xfUCICvy3dSOLOvE1uH1STvy8lWfX3qKThimBQEFQM/edit#).
 
-## Setup
+## Setup - Production
 
+## Setup - Development
+* Install required Python libraries:
+  * `py -m pip install -r .\x-dev\python\requirements.frozen.txt -t .\lib\python3.8`
+* Install a NEW required Python library:
+  * `py -m pip install SQLAlchemy -t .\lib\python3.8`
+  * `py -m pip freeze --path .\lib\python3.8 > .\x-dev\python\requirements.frozen.txt`
+
+
+## Setup - Developer Laptop
 * IDE Settings:
+  * File > Project Structure > SDKs: add path ...\lib\python3.8
   * Use Unix/Mac line endings (\n). Intellij: File > Settings > Editor > Code Style: line separator.
 
+
+# @@@@ WEBFACTION SETUP @@@@
 ### Apache and mod_wsgi
 apached/conf/httpd.conf:
 ```text

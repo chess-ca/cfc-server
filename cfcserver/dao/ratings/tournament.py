@@ -50,7 +50,8 @@ def getall_name(db: bnc_db.GenericDatabase, name):
     name = '%' + str(name).strip('* ').replace('*', '%') + '%'
     sql = """
     SELECT t.*, p.first||' '||p.last AS org_name
-        FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
+        FROM tournament AS t
+            LEFT JOIN player AS p ON t.org_m_id = p.m_id
         WHERE t.name LIKE ? COLLATE NOCASE
         ORDER BY t.last_day DESC
         LIMIT 1000
@@ -65,7 +66,8 @@ def getall_lastdays(db: bnc_db.GenericDatabase, days):
     date_from = (datetime.date.today() - datetime.timedelta(days=days)).strftime('%Y-%m-%d')
     sql = """
     SELECT t.*, p.first||' '||p.last AS org_name
-        FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
+        FROM tournament AS t
+            LEFT JOIN player AS p ON t.org_m_id = p.m_id
         WHERE t.last_day >= ?
         ORDER BY t.last_day DESC
         LIMIT 2000
@@ -80,7 +82,8 @@ def getall_year(db: bnc_db.GenericDatabase, year):
     year_range = [f'{year}-00-00', f'{year}-99-99']
     sql = """
     SELECT t.*, p.first||' '||p.last AS org_name
-        FROM tournament AS t LEFT JOIN player AS p ON t.org_m_id = p.m_id
+        FROM tournament AS t
+            LEFT JOIN player AS p ON t.org_m_id = p.m_id
         WHERE t.last_day >= ? AND t.last_day <= ?
         ORDER BY t.last_day DESC
         LIMIT 2000
