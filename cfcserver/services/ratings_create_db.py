@@ -6,7 +6,7 @@
 # ======================================================================
 import os, sys, csv, logging
 from pathlib import Path
-import cfcserver
+from cfcserver import AppConfig
 from ..dao import ratings2 as dao_ratings
 from ..dao import job
 
@@ -14,7 +14,7 @@ log = logging.getLogger('main')
 
 def create(job_dir):
     okay, job_dir = _initialize(job_dir)
-    with cfcserver.RATINGS_DB(open_next_version=True) as db:
+    with AppConfig.RATINGS_DB(open_next_version=True) as db:
         if okay:
             okay = _create_new_database_and_tables(db)
         if okay:
@@ -33,7 +33,7 @@ def create(job_dir):
 
 
 def _initialize(job_dir):
-    job_dir = Path(os.environ['APP_JOBS_DIR'], job_dir).resolve()
+    job_dir = Path(AppConfig.JOBS_DIR, job_dir).resolve()
     if not job_dir.exists():
         sys.exit(f'ERROR: Job directory not found: {job_dir}')
 

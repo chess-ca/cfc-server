@@ -1,10 +1,10 @@
 
-import bnc4py.db.database
+import codeboy4py.db.database
 
 
-class RatingsDB(bnc4py.db.database.SqliteDB):
+class RatingsDB(codeboy4py.db.database.SqliteDB):
     pass
 
 
-class MasterDB(bnc4py.db.database.SqliteDB):
+class MasterDB(codeboy4py.db.database.SqliteDB):
     pass

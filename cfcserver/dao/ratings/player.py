@@ -1,17 +1,16 @@
 
-from dataclasses import fields
-import bnc4py.db.database as bnc_db
-import cfcserver
+import codeboy4py.db.database as cb4py_db
+import cfcserver.models as models
 
 
-def get_mid(db: bnc_db.GenericDatabase, mid):
+def get_mid(db: cb4py_db.GenericDatabase, mid):
     sql = 'SELECT * FROM player WHERE m_id=?'
     row = db.fetchone(sql, [mid])
     return None if not row \
-        else db.row_to_dataclass(row, cfcserver.models.Player)
+        else db.row_to_dataclass(row, models.Player)
 
 
-def getall_name(db: bnc_db.GenericDatabase, first=None, last=None):
+def getall_name(db: cb4py_db.GenericDatabase, first=None, last=None):
     where = []
     sqldata = []
 
@@ -35,4 +34,4 @@ def getall_name(db: bnc_db.GenericDatabase, first=None, last=None):
     sql = sql.replace('###', ' AND '.join(where))
     rowset = db.fetchrows(sql, sqldata)
     for row in rowset:
-        yield db.row_to_dataclass(row, cfcserver.models.Player)
+        yield db.row_to_dataclass(row, models.Player)

@@ -4,8 +4,7 @@
   "description": "CFC / server.chess.ca",
   "main": "wsgi.py",
   "scripts": {
-    "flask:run": "cd .. && set FLASK_ENV=development && py -3.8 cfc-server.py",
-    "test:cli:ratings": "cd .. && py -3.8 cfc-server.py --dev --action r --job test.ratings",
+    "test:cli:ratings": "cd .. && py -3.8 cfc-server.py --local --dev --action r --job test.ratings",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Don Parakin",

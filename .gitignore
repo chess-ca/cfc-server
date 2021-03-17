@@ -2,6 +2,7 @@
 private/
 app_local/
 zzz-trash/
+.pytest_cache/
 
 #---- Built files
 built/

@@ -40,13 +40,9 @@ class RouteDefiner(object):
 
     def add_url_rules(self, rule_list):
         # rule = (rule_url, import_name[, methods])
-        _GET = ['GET']
         for rule in rule_list:
-            self.add_url_rule(
-                rule=rule[0],
-                import_name=rule[1],
-                methods=rule[2] if len(rule) > 2 else _GET
-            )
+            m_list = rule[3] if len(rule) > 2 else ['GET']
+            self.add_url_rule(rule=rule[0], import_name=rule[1], methods=m_list)
 
 
 # ----------------------------------------------------------------------
