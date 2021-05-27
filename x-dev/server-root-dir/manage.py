@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 # ======================================================================
 # manage.py
-#   - Deploy a release of code from Gitlab to Opalstack & activate it.
+#   - Actions: deploy|start|reload|stop|kill
+#     specific to an Opalstack app running Python uWSGI
 #   - Install:  Copy to ~/apps/myapp; update the vars at the top;
 #     then it invoke as "./manage.py <action>"
-#       - "start"
-#       - "stop"
-#       - "kill"
-#       - "deploy"
 #   - This script may run in a Python version earlier than what is
-#     required by the application.  The Python version required by
+#     required by the application.  The Python version required
 #     may need to be installed if it is not provided by Opalstack.
 #     For example, Python 3.9 was installed in /home/don/opt
 # ======================================================================
 # Config:
 git_repos = 'https://gitlab.com/parakin/cfc-server.git'
-app_dir = '/home/don/apps/cfc_server'
+app_name = 'cfc_server'
+app_dir = '/home/don/apps/{}'.format(app_name)
 python_bin = '/home/don/opt/bin/python3.9'
+
 deploy_dir_prefix = 'deploy-'
-# Derived
-pid_file = app_dir + '/tmp/cfc_server.pid'
-uwsgi_ini_file = app_dir + '/uwsgi.ini'
-uwsgi_bin = app_dir + '/deployed/venv/bin/uwsgi'
+pid_file = '{}/tmp/{}.pid'.format(app_dir, app_name)
+reload_file = '{}/touch-to-reload.txt'.format(app_dir)
+uwsgi_ini_file = '{}/uwsgi.ini'.format(app_dir)
+uwsgi_bin = '{}/deployed/venv/bin/uwsgi'.format(app_dir)
 
 # ======================================================================
 import sys, os, logging, subprocess, shutil
@@ -34,16 +33,27 @@ log = logging.getLogger()
 
 
 def main():
-    actions = {'start': action_start, 'stop': action_stop, 'kill': action_kill, 'deploy': action_deploy}
-    if len(sys.argv) < 2:
-        print('Action not specified. Actions are start|stop|kill|deploy')
-    elif sys.argv[1] in actions:
-        actions[sys.argv[1]]()
+    actions = { 'deploy': action_deploy,
+        'start': action_start, 'reload': action_reload,
+        'stop': action_stop, 'kill': action_kill, }
+    cmd = sys.argv[1] if len(sys.argv) == 2 else None
+    if cmd in actions:
+        actions[cmd]()
     else:
-        print('Invalid action "%s"'.format(sys.argv[1]))
+        print('Valid commands: ' + '|'.join(actions.keys()))
 
 
-# ---------------- start | stop | kill
+def action_deploy():
+    application_dir = Path(app_dir).resolve()
+    deploy_dir = get_next_deploy_dir(application_dir)
+    git_clone(deploy_dir)
+    venv_dir = venv_create(deploy_dir)
+    pip_install_requirements(deploy_dir, venv_dir)
+    pip_install_uwsgi(venv_dir)
+    set_current_deploy(deploy_dir)
+    restart_uwsgi(application_dir)
+
+
 def action_start():
     uwsgi_pid = get_uwsgi_pid()
     if uwsgi_pid in get_users_pids():
@@ -54,6 +64,11 @@ def action_start():
         log.info('Started uWSGI (pid=%s)', uwsgi_pid)
 
 
+def action_reload():
+    subprocess.run(['touch', reload_file], check=True)
+    log.info('Reloaded uWSGI (touched %s)', reload_file)
+
+
 def action_stop():
     uwsgi_pid = get_uwsgi_pid()
     if uwsgi_pid is None:
@@ -62,7 +77,7 @@ def action_stop():
         log.info('Not running (pid=%s not found)', uwsgi_pid)
     else:
         subprocess.run([uwsgi_bin, '--stop', pid_file], check=True)
-        subprocess.run(['rm', pid_file], check=True)
+        subprocess.run(['rm', pid_file])
         log.info('uWSGI stopped (pid was %s)', uwsgi_pid)
 
 
@@ -74,34 +89,8 @@ def action_kill():
         log.info('Not running (pid=%s not found)', uwsgi_pid)
     else:
         subprocess.run(['kill', '-9', uwsgi_pid], check=False)
+        subprocess.run(['rm', pid_file])
         log.info('uWSGI killed (pid was %s)', uwsgi_pid)
-
-
-def get_uwsgi_pid():
-    if not Path(pid_file).exists():
-        return None
-    with open(pid_file, 'rb') as f:
-        pid = f.read().strip()
-    return pid
-
-def get_users_pids():
-    out = dict(stdout=subprocess.PIPE)
-    user = subprocess.run('whoami', **out).stdout.strip()
-    cmd = ['ps', '-u', user, '-opid=']
-    pids = subprocess.run(cmd, **out).stdout
-    return pids.split()
-
-
-# ---------------- deploy
-def action_deploy():
-    application_dir = Path(app_dir).resolve()
-    deploy_dir = get_next_deploy_dir(application_dir)
-    git_clone(deploy_dir)
-    venv_dir = venv_create(deploy_dir)
-    pip_install_requirements(deploy_dir, venv_dir)
-    pip_install_uwsgi(venv_dir)
-    set_current_deploy(deploy_dir)
-    restart_uwsgi(application_dir)
 
 
 def get_next_deploy_dir(application_dir):
@@ -170,6 +159,21 @@ def restart_uwsgi(application_dir):
     log.info('---- ---- uwsgi: restart')
     cmd = ['touch', str(application_dir / 'touch-to-reload.txt')]
     subprocess.run(cmd, check=True)
+
+
+def get_uwsgi_pid():
+    if not Path(pid_file).exists():
+        return None
+    with open(pid_file, 'rb') as f:
+        pid = f.read().strip()
+    return pid
+
+def get_users_pids():
+    out = dict(stdout=subprocess.PIPE)
+    user = subprocess.run('whoami', **out).stdout.strip()
+    cmd = ['ps', '-u', user, '-opid=']
+    pids = subprocess.run(cmd, **out).stdout
+    return pids.split()
 
 
 main()
