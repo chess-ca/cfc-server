@@ -1,5 +1,16 @@
+'''Main entry point to start the application from either a uWSGI server (for prod),
+Flasks built-in .run (for dev), or CLI (Python command line interface for batch).
 
-import sys, os
+Args:
+    --flask: run the Flask dev environ.
+    --dev: use settings for development.
+    --local: use the local development environ's config file.
+    (other args for CLI: see ui/cli/run.py:_parse_args()
+Environment Variables:
+    CFCSERVER_CONFIG_FILE: if not --local, it's the app's configuration file.
+'''
+
+import sys, os, logging
 if sys.version_info < (3,7):    # for dataclasses, etc
     raise Exception('FATAL: This app requires Python version 3.7 or later.')
 from pathlib import Path
@@ -19,6 +30,7 @@ def main():
 
 
 def _run_flask_with_uwsgi():
+    '''Run App in uWSGI and Flask (production)'''
     global application
     import cfcserver
     cfcserver.initialize(get_config_file())
@@ -26,6 +38,7 @@ def _run_flask_with_uwsgi():
 
 
 def _run_flask_with_development_server():
+    '''Run App in Flask.run() (development)'''
     import cfcserver
     cfcserver.initialize(get_config_file())
     if '--dev' in sys.argv:
@@ -37,6 +50,7 @@ def _run_flask_with_development_server():
 
 
 def _run_command_line_interface():
+    '''Run App in command line interface (background jobs)'''
     import cfcserver
     cfcserver.initialize(get_config_file())
     import ui.cli as ui_cli
@@ -54,11 +68,15 @@ def _initialize_flask():
 
 
 def get_config_file():
-    app_config_file = os.environ.get(_config_file_env_var, None)
-    if '--local' in sys.argv or app_config_file is None:
-        app_config_file = str(_app_root_dir / 'app_local' / 'config' / 'app.config')
+    if '--local' in sys.argv:
+        app_config_file = str(_app_root_dir / 'app_local/config/app.config')
+    elif _config_file_env_var not in os.environ:
+        raise ValueError('FATAL: Set environment var "{}" or use --local'.format(_config_file_env_var))
+    else:
+        app_config_file = os.environ.get(_config_file_env_var)
     if not Path(app_config_file).exists():
-        raise Exception('FATAL: App config file not found: ' + (app_config_file or '(unspecified)'))
+        raise FileNotFoundError('FATAL: App config file not found: ' + (app_config_file or '(unspecified)'))
+    logging.info('Using app config file: %s', app_config_file)
     return app_config_file
 
 
