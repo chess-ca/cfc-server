@@ -1,18 +1,51 @@
 # ======================================================================
 # py/config.py - Configuration Helper
 # ======================================================================
-import configparser, pathlib
+import configparser, os.path
 
 
 def get_config_section(config_file, section):
-    if not pathlib.Path(config_file).exists():
-        raise Exception('CB4PY0000: App config file not found: ' + config_file)
+    if not os.path.isfile(config_file):
+        raise Exception('CB4PY0000: Config file not found: ' + config_file)
     cp = configparser.ConfigParser()
     cp.read(config_file)
     if not cp.has_section(section):
-        raise Exception('CB4PY0000: Mising section "{}" in config file {}'
+        raise Exception('CB4PY0000: Missing section "{}" in config file {}'
             .format(section, config_file))
     return cp[section]
+
+
+def set_from_config_file(clazz, config_file, config_section, required_vars):
+    config = get_config_section(config_file, config_section)
+    for var in required_vars:
+        if var not in config:
+            raise KeyError('Var "{}" not found in section "{}" of config file {}'
+                .format(var, config_file))
+        setattr(clazz, var, config[var])
+
+
+
+class AppConfigBase:
+    @classmethod
+    def set_from_config_ini(cls, config_file, config_section, required):
+        pass
+
+    @classmethod
+    def get(cls, attr_name, default=None, substitions=True):
+        if not hasattr(cls, attr_name):
+            raise ValueError('CB4PY0000: App config missing attribute: ' + attr_name)
+        attr_value = getattr(cls, attr_name, default)
+        if substitions and isinstance(attr_value, str):
+            levels = 5
+            while levels > 0 and '{' in attr_value:
+                attr_value = attr_value.format(**cls.__dict__)
+                levels -= 1
+        return attr_value
+
+    @classmethod
+    def load_from_ini(self, ini_file, ini_section):
+        if not os.path.isfile(ini_file):
+            raise FileNotFoundError('CB4PY0000: App config file not found: ' + ini_file)
 
 
 class Registry:

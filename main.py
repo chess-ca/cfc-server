@@ -1,32 +1,37 @@
-'''Main entry point to start the application from either a uWSGI server (for prod),
-Flasks built-in .run (for dev), or CLI (Python command line interface for batch).
+"""
+Start the application to run either with (1) uWSGI server (for prod), (2) Flask's
+built-in dev server (for dev), or (3) Python's command line interface (for batch).
+
+Environment Variables:
+    CFCSERVER_CONFIG_FILE: App's configuration file (required if not --local)
 
 Args:
-    --flask: run the Flask dev environ.
+    --flask: run with Flask's built-in dev server.
     --dev: use settings for development.
-    --local: use the local development environ's config file.
+    --local: config file is in the local development environ.
     (other args for CLI: see ui/cli/run.py:_parse_args()
-Environment Variables:
-    CFCSERVER_CONFIG_FILE: if not --local, it's the app's configuration file.
-'''
+"""
 
-import sys, os, logging
-if sys.version_info < (3,7):    # for dataclasses, etc
+import sys, os
+if sys.version_info < (3,7):    # for dataclasses, f-strings (3.6), etc
     raise Exception('FATAL: This app requires Python version 3.7 or later.')
 from pathlib import Path
 
-application = None      # for uWSGI
 _config_file_env_var = 'CFCSERVER_CONFIG_FILE'
 _app_root_dir = Path(__file__).resolve().parent
 
+application = None      # Used by uWSGI
+
 
 def main():
-    if __name__ != '__main__':
-        _run_flask_with_uwsgi()
+    if '--cli' in sys.argv:
+        _run_command_line_interface()
     elif '--flask' in sys.argv:
         _run_flask_with_development_server()
+    elif __name__ != '__main__':
+        _run_flask_with_uwsgi()
     else:
-        _run_command_line_interface()
+        raise Exception('Invalid run mode. Was not CLI (--cli), Flask (--flask), or uWSGI')
 
 
 def _run_flask_with_uwsgi():
@@ -53,31 +58,31 @@ def _run_command_line_interface():
     '''Run App in command line interface (background jobs)'''
     import cfcserver
     cfcserver.initialize(get_config_file())
-    import ui.cli as ui_cli
+    import cfcserver.ui.cli as ui_cli
     ui_cli.run()
 
 
 def _initialize_flask():
     from flask import Flask
-    import ui.api, ui.html
+    import cfcserver.ui.api
+    import cfcserver.ui.html as ui_html
     flask_app = Flask(__name__.split('.')[0])
     flask_app.config['JSON_SORT_KEYS'] = False
-    ui.api.initialize(flask_app)
-    ui.html.initialize(flask_app)
+    cfcserver.ui.api.initialize(flask_app)
+    ui_html.initialize(flask_app)
     return flask_app
 
 
 def get_config_file():
     if '--local' in sys.argv:
-        app_config_file = str(_app_root_dir / 'app_local/config/app.config')
+        config_file = str(_app_root_dir / 'app_local/config/app.config.ini')
     elif _config_file_env_var not in os.environ:
         raise ValueError('FATAL: Set environment var "{}" or use --local'.format(_config_file_env_var))
     else:
-        app_config_file = os.environ.get(_config_file_env_var)
-    if not Path(app_config_file).exists():
-        raise FileNotFoundError('FATAL: App config file not found: ' + (app_config_file or '(unspecified)'))
-    logging.info('Using app config file: %s', app_config_file)
-    return app_config_file
+        config_file = os.environ.get(_config_file_env_var)
+    if not Path(config_file).exists():
+        raise FileNotFoundError('FATAL: Config file not found: ' + (config_file or '(unspecified)'))
+    return config_file
 
 
 main()

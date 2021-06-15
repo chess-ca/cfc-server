@@ -8,7 +8,7 @@ def initialize(app):
 
     rd = cb4py_routing.RouteDefiner(ui_api)
     rd.set_rule_prefix('/api/ratings')
-    rd.set_import_prefix('ui.api.ratings.')
+    rd.set_import_prefix('cfcserver.ui.api.ratings.')
     rd.add_url_rules([
         ('/player/find', 'player.find'),
         # ('/player/prov/<prov>', 'player.province'),

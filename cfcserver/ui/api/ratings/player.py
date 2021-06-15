@@ -1,7 +1,7 @@
 
 import flask
 from cfcserver import AppConfig
-from ui.api.shared import api_response
+from cfcserver.ui.api.shared import api_response
 
 
 def find():

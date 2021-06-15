@@ -3,7 +3,7 @@
 # ======================================================================
 import sys, argparse
 import logging
-log = logging.getLogger()
+log = logging.getLogger('app')
 log.setLevel(logging.INFO)
 
 
@@ -15,14 +15,17 @@ def run():
     elif args.action == 'rc':
         from cfcserver.services import ratings_create_db_v2
         ratings_create_db_v2.create(args.job)
+    elif args.action == 'cfcdb':
+        from cfcserver.services import cfcdb_create
+        cfcdb_create.create(args.job)
     else:
         print(f'Unknown action: "{args.action}"')
 
 
 def _parse_args():
     ap = argparse.ArgumentParser(description='CFC-Server: command line tasks')
-    ap.add_argument('-a', '--action', dest='action', required=True,
-        choices=['r', 'rc'],
+    ap.add_argument('--cli', dest='action', required=True,
+        choices=['r', 'rc', 'cfcdb'],
         help='Action: rc=ratings-create; ')
     ap.add_argument('-j', '--job', dest='job',
         help='Name of the directory containing the job')
