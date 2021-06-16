@@ -10,7 +10,7 @@ from cfcserver import AppConfig
 from ..dao import ratings2 as dao_ratings
 from ..dao import job
 
-log = logging.getLogger('main')
+log = logging.getLogger('app')
 
 def create(job_dir):
     okay, job_dir = _initialize(job_dir)
@@ -27,6 +27,8 @@ def create(job_dir):
             okay = _insert_recent_events(db, job_dir)
         if okay:
             okay = _create_indices(db)
+        if okay:
+            okay = _create_extract_for_ratings_audit(db)
         if okay:
             db.make_this_db_active()
     log.info('JOB ENDED:')
@@ -113,6 +115,11 @@ def _create_indices(db):
     db.execute('CREATE INDEX ix_crosstable_1 ON crosstable (t_id, place)')
     db.execute('CREATE INDEX ix_crosstable_2 ON crosstable (m_id)')
     db.commit()
+    return True
+
+
+def _create_extract_for_ratings_audit(db):
+    x = AppConfig.RATING
     return True
 
 

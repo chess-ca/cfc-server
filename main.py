@@ -35,7 +35,7 @@ def main():
 
 
 def _run_flask_with_uwsgi():
-    '''Run App in uWSGI and Flask (production)'''
+    """Run App with Flask and uWSGI (production)"""
     global application
     import cfcserver
     cfcserver.initialize(get_config_file())
@@ -43,7 +43,7 @@ def _run_flask_with_uwsgi():
 
 
 def _run_flask_with_development_server():
-    '''Run App in Flask.run() (development)'''
+    """Run App with Flask's built-in server (development)"""
     import cfcserver
     cfcserver.initialize(get_config_file())
     if '--dev' in sys.argv:
@@ -55,7 +55,7 @@ def _run_flask_with_development_server():
 
 
 def _run_command_line_interface():
-    '''Run App in command line interface (background jobs)'''
+    """Run App with command line interface (background jobs)"""
     import cfcserver
     cfcserver.initialize(get_config_file())
     import cfcserver.ui.cli as ui_cli
@@ -64,11 +64,12 @@ def _run_command_line_interface():
 
 def _initialize_flask():
     from flask import Flask
-    import cfcserver.ui.api
-    import cfcserver.ui.html as ui_html
     flask_app = Flask(__name__.split('.')[0])
     flask_app.config['JSON_SORT_KEYS'] = False
-    cfcserver.ui.api.initialize(flask_app)
+
+    import cfcserver.ui.api as ui_api
+    import cfcserver.ui.html as ui_html
+    ui_api.initialize(flask_app)
     ui_html.initialize(flask_app)
     return flask_app
 

@@ -12,9 +12,6 @@ def run():
     if args.action == 'r':
         from cfcserver.services import ratings_create_db
         ratings_create_db.create(args.job)
-    elif args.action == 'rc':
-        from cfcserver.services import ratings_create_db_v2
-        ratings_create_db_v2.create(args.job)
     elif args.action == 'cfcdb':
         from cfcserver.services import cfcdb_create
         cfcdb_create.create(args.job)
@@ -34,3 +31,9 @@ def _parse_args():
     ap.add_argument('--dev', dest='is_dev', action='store_true',
         help='Use development\'s configuration values')
     return ap.parse_args()
+
+
+# ======================================================================
+# Dev Notes:
+# - Cannot import cfcserver outside of run() since app is not fully
+#   initialized yet; it causes undefined or circular import errors.
