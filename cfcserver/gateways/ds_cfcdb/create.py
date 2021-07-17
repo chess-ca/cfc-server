@@ -1,19 +1,19 @@
 
 import csv
 import sqlalchemy as sa
-from . import ds_cfcdb_schema
+from . import schema
 
 
 def create_tables(dbcon):
-    ds_cfcdb_schema.sa_metadata.create_all(dbcon)
+    schema.sa_metadata.create_all(dbcon)
 
 
 def create_indices(dbcon):
-    ds_cfcdb_schema.create_indices(dbcon)
+    schema.create_indices(dbcon)
 
 
 def metadata_insert(dbcon, metadata):
-    sql = sa.insert(ds_cfcdb_schema.t_metadata)
+    sql = sa.insert(schema.t_metadata)
     sqldata = [dict(key=k, value=v) for k, v in metadata.items()]
     r = dbcon.execute(sql, sqldata)
     dbcon.commit()
@@ -22,7 +22,7 @@ def metadata_insert(dbcon, metadata):
 
 def members_load_from_csv(dbcon, csv_fpath):
     n_loaded = 0
-    sql = sa.insert(ds_cfcdb_schema.t_player)
+    sql = sa.insert(schema.t_player)
     sqldata = []
     with open(csv_fpath, 'r') as csv_f:
         data_csv = csv.DictReader(csv_f)
@@ -69,7 +69,7 @@ def members_load_from_csv(dbcon, csv_fpath):
 
 def events_load_from_csv(dbcon, csv_fpath):
     n_loaded = 0
-    sql = sa.insert(ds_cfcdb_schema.t_event)
+    sql = sa.insert(schema.t_event)
     sqldata = []
     with open(csv_fpath, 'r') as csv_f:
         data_csv = csv.DictReader(csv_f)
@@ -107,7 +107,7 @@ def events_load_from_csv(dbcon, csv_fpath):
 
 def results_load_from_csv(dbcon, csv_fpath):
     n_loaded = 0
-    sql = sa.insert(ds_cfcdb_schema.t_crosstable)
+    sql = sa.insert(schema.t_crosstable)
     sqldata = []
     with open(csv_fpath, 'r') as csv_f:
         data_csv = csv.DictReader(csv_f)

@@ -119,7 +119,6 @@ def _create_indices(db):
 
 
 def _create_extract_for_ratings_audit(db):
-    x = AppConfig.RATING
     return True
 
 
