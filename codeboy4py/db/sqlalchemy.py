@@ -2,7 +2,39 @@
 Helpers for SQLAlchemy access to databases
 """
 import sqlalchemy as sa
+import dataclasses as dc
 import pathlib, configparser, datetime
+
+
+class RowToDataclassConverter:
+    """
+    Convert an SQLAlchemy database row to a Python dataclass.
+     - Row may have only a subset of the table's columns so
+       columns not in the row are auto-skipped.
+     - Initialize once then re-use many times (for performance)
+    """
+    def __init__(self, dataclass: dc.dataclass, rename=None, skip=None):
+        """
+        :param dataclass: a Python class decorated with @dataclass
+        :param rename: Map of database-column-name -> dataclass-attr-name
+        :param skip: List of dataclass-attr-names to exclude
+        """
+        self._dataclass = dataclass
+        attr_to_col_rename = {} if rename is None \
+            else {attr: col for col, attr in rename.items()}
+        self._col_to_attr = {}
+        for attr in self._dataclass._fields:
+            if skip is None or attr not in skip:
+                col = attr_to_col_rename.get(attr, attr)
+                self._col_to_attr[col] = attr
+
+    def to_dataclass(self, row: sa.engine.Row):
+        """Convert row (from SQLAlchemy) to dataclass (app's models)"""
+        attributes = {}
+        for col, attr in self._col_to_attr.items():
+            if hasattr(row, col):   # row may have only a subset of columns
+                attributes[attr] = getattr(row, col)
+        return self._dataclass(**attributes)
 
 
 class VersionedSQLiteDB:

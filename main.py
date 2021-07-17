@@ -14,7 +14,7 @@ Args:
 
 import sys, os
 if sys.version_info < (3,7):    # for dataclasses, f-strings (3.6), etc
-    raise Exception('FATAL: This app requires Python version 3.7 or later.')
+    raise Exception('Python version 3.7 or later is required')
 from pathlib import Path
 
 _config_file_env_var = 'CFCSERVER_CONFIG_FILE'
@@ -76,14 +76,14 @@ def _initialize_flask():
 
 def get_config_file():
     if '--local' in sys.argv:
-        config_file = str(_app_root_dir / 'app_local/config/app.config.ini')
+        config_file = _app_root_dir / 'app_local/config/app.config.ini'
     elif _config_file_env_var not in os.environ:
-        raise ValueError('FATAL: Set environment var "{}" or use --local'.format(_config_file_env_var))
+        raise Exception('Set environment var "{}" or use --local'.format(_config_file_env_var))
     else:
-        config_file = os.environ.get(_config_file_env_var)
-    if not Path(config_file).exists():
-        raise FileNotFoundError('FATAL: Config file not found: ' + (config_file or '(unspecified)'))
-    return config_file
+        config_file = Path(os.environ.get(_config_file_env_var)).resolve()
+    if not config_file.exists():
+        raise FileNotFoundError('Config file not found: ' + (config_file or '(unspecified)'))
+    return str(config_file)
 
 
 main()

@@ -1,7 +1,8 @@
 # ======================================================================
 # CLI - Command Line Interface
 # ======================================================================
-import sys, argparse
+import argparse
+from importlib import import_module
 import logging
 log = logging.getLogger('app')
 log.setLevel(logging.INFO)
@@ -13,8 +14,8 @@ def run():
         from cfcserver.services import ratings_create_db
         ratings_create_db.create(args.job)
     elif args.action == 'cfcdb':
-        from cfcserver.services import cfcdb_create
-        cfcdb_create.create(args.job)
+        s_cfcdb = import_module('cfcserver.services.cfcdb')
+        s_cfcdb.create(args.job)
     else:
         print(f'Unknown action: "{args.action}"')
 
