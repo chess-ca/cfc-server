@@ -10,7 +10,7 @@ log = logging.getLogger('cfcserver')
 
 def create(job_dir):
     next_version = AppConfig.CFCDB.get_next_unused_version()
-    with AppConfig.CFCDB.begin(version=next_version) as dbcon:
+    with AppConfig.CFCDB.connect(version=next_version) as dbcon:
         job_dir = _initialize(job_dir)
         _create_new_database_and_tables(dbcon)
         _insert_metadata(dbcon, job_dir)

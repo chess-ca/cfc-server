@@ -5,18 +5,20 @@ from . import schema
 
 
 def create_tables(dbcon):
-    schema.sa_metadata.create_all(dbcon)
+    with dbcon.begin():
+        schema.sa_metadata.create_all(dbcon)
 
 
 def create_indices(dbcon):
-    schema.create_indices(dbcon)
+    with dbcon.begin():
+        schema.create_indices(dbcon)
 
 
 def metadata_insert(dbcon, metadata):
     sql = sa.insert(schema.t_metadata)
     sqldata = [dict(key=k, value=v) for k, v in metadata.items()]
-    r = dbcon.execute(sql, sqldata)
-    dbcon.commit()
+    with dbcon.begin():
+        r = dbcon.execute(sql, sqldata)
     return r.rowcount
 
 
@@ -54,16 +56,15 @@ def members_load_from_csv(dbcon, csv_fpath):
                 last_update=str(row['last_update']),
             ))
             if len(sqldata) >= 1000:
-                dbcon.execute(sql, sqldata)
-                dbcon.commit()
+                with dbcon.begin():
+                    dbcon.execute(sql, sqldata)
                 n_loaded += len(sqldata)
                 sqldata = []
 
         if len(sqldata) >= 1:
-            dbcon.execute(sql, sqldata)
-            dbcon.commit()
+            with dbcon.begin():
+                dbcon.execute(sql, sqldata)
             n_loaded += len(sqldata)
-        dbcon.commit()
     return n_loaded
 
 
@@ -92,16 +93,15 @@ def events_load_from_csv(dbcon, csv_fpath):
                 # pairings rating_type n_players n_rounds
             ))
             if len(sqldata) >= 1000:
-                dbcon.execute(sql, sqldata)
-                dbcon.commit()
+                with dbcon.begin():
+                    dbcon.execute(sql, sqldata)
                 n_loaded += len(sqldata)
                 sqldata = []
 
         if len(sqldata) >= 1:
-            dbcon.execute(sql, sqldata)
-            dbcon.commit()
+            with dbcon.begin():
+                dbcon.execute(sql, sqldata)
             n_loaded += len(sqldata)
-        dbcon.commit()
     return n_loaded
 
 
@@ -132,14 +132,13 @@ def results_load_from_csv(dbcon, csv_fpath):
                 # rating_type rating_pre rating_perf rating_post rating_indicator
             ))
             if len(sqldata) >= 1000:
-                dbcon.execute(sql, sqldata)
-                dbcon.commit()
+                with dbcon.begin():
+                    dbcon.execute(sql, sqldata)
                 n_loaded += len(sqldata)
                 sqldata = []
 
         if len(sqldata) >= 1:
-            dbcon.execute(sql, sqldata)
-            dbcon.commit()
+            with dbcon.begin():
+                dbcon.execute(sql, sqldata)
             n_loaded += len(sqldata)
-        dbcon.commit()
     return n_loaded

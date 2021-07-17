@@ -4,15 +4,15 @@
 import configparser, os.path
 
 
-def get_config_section(config_file, section):
+def get_config_section(config_file, config_section):
     if not os.path.isfile(config_file):
         raise Exception('CB4PY0000: Config file not found: ' + config_file)
     cp = configparser.ConfigParser()
     cp.read(config_file)
-    if not cp.has_section(section):
+    if not cp.has_section(config_section):
         raise Exception('CB4PY0000: Missing section "{}" in config file {}'
-            .format(section, config_file))
-    return cp[section]
+            .format(config_section, config_file))
+    return cp[config_section]
 
 
 def set_from_config_file(clazz, config_file, config_section, required_vars):
@@ -20,7 +20,7 @@ def set_from_config_file(clazz, config_file, config_section, required_vars):
     for var in required_vars:
         if var not in config:
             raise KeyError('Var "{}" not found in section "{}" of config file {}'
-                .format(var, config_file))
+                .format(var, config_section, config_file))
         setattr(clazz, var, config[var])
 
 
