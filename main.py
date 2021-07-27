@@ -13,7 +13,7 @@ Args:
 """
 
 import sys, os
-if sys.version_info < (3,7):    # for dataclasses, f-strings (3.6), etc
+if sys.version_info < (3,7):    # 3.7+ for dataclasses; 3.6+ for f-strings; ...
     raise Exception('Python version 3.7 or later is required')
 from pathlib import Path
 
@@ -31,7 +31,7 @@ def main():
     elif __name__ != '__main__':
         _run_flask_with_uwsgi()
     else:
-        raise Exception('Invalid run mode. Was not CLI (--cli), Flask (--flask), or uWSGI')
+        raise Exception('Invalid run mode. Invoke with --cli, --flask, or from uWSGI')
 
 
 def _run_flask_with_uwsgi():
