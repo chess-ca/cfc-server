@@ -1,12 +1,74 @@
 """
 Helpers for SQLAlchemy access to databases
 """
+from typing import Union, List
 import sqlalchemy as sa
 import dataclasses as dc
 import pathlib, configparser, datetime
 
 
-class RowToDataclassConverter:
+class RowToDict:
+    """
+    Converts SQLAlchemy Rows to a Python dicts
+
+    - Only the specified columns are included in the dict
+      (to omit columns that should be excluded).
+    - Can rename database columns to different dict keys.
+    - Can get a list of SQLAlchemy columns for use in `select(...)`
+      (to minimize the data fetched from the database).
+    - Should pre-define it once; then re-use in many requests.
+    """
+    def __init__(self,
+            include: Union[List[str], str, None] = None,
+            rename: Union[dict, None] = None,
+            table: Union[sa.Table, None] = None,
+    ):
+        """
+        :param include: list of row cols to be included
+            (can be a list or a space-separated string)
+        :param rename: map of database column names to dict keys
+        :param table: SQLAlchemy Table from which to get a subset
+            of its columns for use in `select(...)`.
+        """
+        self._include = include if isinstance(include, list) \
+            else str(include).split() if isinstance(include, str) \
+            else '*'    # Default: include all row fields.
+        self._rename = rename or {}
+        if table is None:
+            self._cols = None
+        elif self._include == '*':
+            self._cols = list(table.c)
+        else:
+            self._cols = [getattr(table.c, col)
+                for col in self._include
+                if hasattr(table.c, col)
+            ]
+
+    def to_dict(self, row: sa.engine.Row) -> dict:
+        """
+        Convert a SQLAlchemy row to a dict with only the included columns
+        (with renaming of columns to keys as specified).
+
+        - row._asdict() can be used instead (with slightly better performance
+          but slightly less future-proof) if this converter was instantiated
+          with a table, this.get_cols() was used in the select(...), and
+          no columns need to be renamed. In this case, the row will already
+          have only the needed columns with the correct names.
+
+        :param row: an SQLAlchemy row
+        """
+        a_dict = {}
+        for col in row._fields:
+            if self._include == '*' or col in self._include:
+                key = self._rename.get(col, col)
+                a_dict[key] = getattr(row, col)
+        return a_dict
+
+    def get_cols(self) -> list:
+        return self._cols
+
+
+class RowToDataclass:
     """
     Convert an SQLAlchemy database row to a Python dataclass.
      - Row may have only a subset of the table's columns so
