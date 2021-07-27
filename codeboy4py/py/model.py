@@ -1,3 +1,0 @@
-
-class ModelMixins:
-    pass
