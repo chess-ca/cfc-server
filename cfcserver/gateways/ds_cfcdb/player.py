@@ -7,7 +7,7 @@ from .schema import t_player, t_event, t_crosstable
 from codeboy4py.db.sqlalchemy import RowToDict
 
 _r2d_top_players = RowToDict(table=t_player,
-    include='birthdate cfc_id cfc_expiry fide_id name_first name_last addr_city addr_province regular_rating regular_indicator quick_rating quick_indicator')
+    include='cfc_id cfc_expiry fide_id name_first name_last addr_city addr_province regular_rating regular_indicator quick_rating quick_indicator')
 
 
 def find_top_players(
@@ -98,11 +98,17 @@ def find_top_players(
     players = []
     with dbcon.begin():
         # Must exclude extra players fetched if they have not tied for nth place
+        prev_pos, prev_rating = -1, -1
         r_nth = 0
         for n, row in enumerate(dbcon.execute(sql)):
             player = row_to_dict.to_dict(row)
             players_rating = player['quick_rating'] if rating_type == 'Q' \
                 else player['regular_rating']
+            if players_rating == prev_rating:
+                player['pos'] = prev_pos
+            else:
+                player['pos'] = n + 1
+                prev_pos, prev_rating = n + 1, players_rating
 
             if topn <= 0 or n < topn:
                 # Player is in top n: include
