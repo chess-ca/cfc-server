@@ -1,11 +1,13 @@
 click==8.0.1
 colorama==0.4.4
 Flask==2.0.1
-greenlet==1.1.0
+Flask-Cors==3.0.10
+greenlet==1.1.1
 itsdangerous==2.0.1
 Jinja2==3.0.1
 MarkupSafe==2.0.1
 pydantic==1.8.2
-SQLAlchemy==1.4.21
+six==1.16.0
+SQLAlchemy==1.4.22
 typing-extensions==3.10.0.0
 Werkzeug==2.0.1

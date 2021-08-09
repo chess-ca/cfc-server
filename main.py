@@ -64,7 +64,9 @@ def _run_command_line_interface():
 
 def _initialize_flask():
     from flask import Flask
+    from flask_cors import CORS
     flask_app = Flask(__name__.split('.')[0])
+    CORS(flask_app)
     flask_app.config['JSON_SORT_KEYS'] = False
 
     import cfcserver.ui.api as ui_api
