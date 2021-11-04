@@ -1,0 +1,18 @@
+@charset "utf-8";
+
+//-------- Before Bulma Styling
+@import "style.before-bulma";
+
+//-------- Bulma: import only what is needed
+@import "../../../x-dev/node_modules/bulma/sass/utilities/_all";
+@import "../../../x-dev/node_modules/bulma/sass/base/_all";
+
+@import "../../../x-dev/node_modules/bulma/sass/elements/_all";
+@import "../../../x-dev/node_modules/bulma/sass/components/_all";
+@import "../../../x-dev/node_modules/bulma/sass/form/_all";
+@import "../../../x-dev/node_modules/bulma/sass/grid/_all";
+@import "../../../x-dev/node_modules/bulma/sass/helpers/_all";
+@import "../../../x-dev/node_modules/bulma/sass/layout/_all";
+
+//-------- After Bulma Styling (may use default Bulma vars)
+@import "style.after-bulma";

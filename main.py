@@ -66,8 +66,10 @@ def _initialize_flask():
     from flask import Flask
     from flask_cors import CORS
     flask_app = Flask(__name__.split('.')[0])
+    flask_app.static_folder = 'cfcserver/static'
     CORS(flask_app)
     flask_app.config['JSON_SORT_KEYS'] = False
+    flask_app.secret_key = os.environ.get('APP_SECRET_KEY', 'secret-for-dev-only')
 
     import cfcserver.ui.api as ui_api
     import cfcserver.ui.html as ui_html

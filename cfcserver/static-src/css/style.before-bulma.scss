@@ -1,0 +1,90 @@
+
+//======================================================================
+// Colour Palette (cp)
+//======================================================================
+$cp-text: #303030;
+$cp-bg: #fefbf6;
+
+//---- Primary  (based on material.io's "Teal" palette
+$cp-p50:  #E0F2F1;
+$cp-p100: #B2DFDB;
+$cp-p200: #80CBC4;
+$cp-p300: #4DB6AC;
+$cp-p400: #26A69A;
+$cp-p500: #009688;
+$cp-p600: #00897B;
+$cp-p700: #00796B;
+$cp-p800: #00695C;
+$cp-p900: #004D40;
+$cp-pa100: #A7FFEB;
+$cp-pa200: #64FFDA;
+$cp-pa400: #1DE9B6;
+$cp-pa700: #00BFA5;
+
+//---- Accent  (based on material.io's "Deep Orange" palette
+$cp-a50: #FBE9E7;
+$cp-a100: #FFCCBC;
+$cp-a200: #FFAB91;
+$cp-a300: #FF8A65;
+$cp-a400: #FF7043;
+$cp-a500: #FF5722;
+$cp-a600: #F4511E;
+$cp-a700: #E64A19;
+$cp-a800: #D84315;
+$cp-a900: #BF360C;
+$cp-aa100: #FF9E80;
+$cp-aa200: #FF6E40;
+$cp-aa400: #FF3D00;
+$cp-aa700: #DD2C00;
+
+//---- Neutral
+$cp-n900: hsl(39,85%,25%);
+$cp-n700: hsl(39,85%,45%);
+$cp-n500: hsl(39,85%,70%);
+$cp-n400: hsl(39,85%,85%);
+$cp-n300: hsl(39,85%,90%);
+$cp-n200: hsl(39,85%,95%);
+$cp-n100: hsl(39,85%,98%);
+
+$primary: $cp-p300;
+$primary-invert: #000;  // $cp-text;
+$link: $cp-p400;
+$text: $cp-text;
+$text-strong: #000;
+
+//======================================================================
+// Fonts
+//  - As recommended by Lighthouse, better performance if <link> tag
+//    is used in the HTML instead of an @import in the CSS.
+//======================================================================
+$family-serif: serif;
+$family-sans-serif:  'Calibri', sans-serif;
+$family-monospace: "Source Code Pro", monospace;
+$family-primary: $family-sans-serif;
+$family-secondary: $family-sans-serif;
+
+$body-size: 18px;
+$title-color: $cp-p500;
+$content-heading-color: $cp-p500;
+.title, .subtitle, h1, h2, h3 {
+  font-family: $family-secondary; }
+
+//======================================================================
+// Bulma Settings
+//======================================================================
+$background: $cp-bg;
+$body-background-color: $cp-bg;
+$table-background-color: $cp-bg;
+
+$widescreen-enabled: false;
+$fullhd-enabled: false;
+
+// Update some of Bulma's component variables
+$body-background-color: #fff;  //$cp-n100;
+//$control-border-width: 2px;
+//$input-border-color: transparent;
+//$input-shadow: none;
+
+//---- Top Navbar (top of page, with CFC logo
+$navbar-height: 6rem;
+$navbar-item-img-max-height: 80px;

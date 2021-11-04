@@ -6,7 +6,7 @@ zzz-trash/
 
 #---- Built files
 built/
-built.*
+built-*/
 
 #---- Hugo
 hugo/public/
@@ -32,6 +32,6 @@ venv/
 
 #---- IDE (IntelliJ)
 /.idea/
-/BNC-Blog.iml
+/*.iml
 
 #---- Specific Files

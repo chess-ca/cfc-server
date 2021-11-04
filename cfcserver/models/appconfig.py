@@ -19,6 +19,9 @@ class AppConfig(AppConfigBase):
     DATA_DIR: str = ''
     JOBS_DIR: str = ''
     FILES_DIR: str = ''
+    AUTH_GOOGLE_CLIENT_ID = ''
+    AUTH_GOOGLE_CLIENT_SECRET = ''
+    AUTH_EMAILS = ''
 
     # -------- UI Config
     RATINGS_CACHE_MAXAGE: str = '600'
@@ -26,6 +29,8 @@ class AppConfig(AppConfigBase):
     # -------- App Config
     CFCDB: cb4py_sqla.VersionedSQLiteDB
     RATINGS_AUDIT_EXTRACT_FILE: str
+
+    STATIC_BUILT_URL: str = '/static/built-unset/{}'
 
     # @@@@@@@@@@@@@@@@@@@ TODO: V2-Deprecate
     dao = None
@@ -43,7 +48,9 @@ class AppConfig(AppConfigBase):
 
         cls.CONFIG_FILE = app_config_file
         cls.init_from_config_file(app_config_file, 'cfcserver', required=[
-            'ENV', 'CONFIG_DIR', 'DATA_DIR', 'JOBS_DIR', 'FILES_DIR'
+            'ENV', 'CONFIG_DIR', 'DATA_DIR', 'JOBS_DIR', 'FILES_DIR',
+            'AUTH_GOOGLE_CLIENT_ID', 'AUTH_GOOGLE_CLIENT_SECRET',
+            'AUTH_EMAILS',
         ])
 
         cls.CFCDB = cb4py_sqla.VersionedSQLiteDB(

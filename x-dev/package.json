@@ -5,11 +5,22 @@
   "main": "wsgi.py",
   "scripts": {
     "test:cli:ratings": "cd .. && py -3.8 cfc-server.py --local --dev --action r --job test.ratings",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "rollup:watch-dev": "cd .. && rollup -c x-dev/rollupjs/rollup.config.cjs --environment BUILD:dev --watch",
+    "rollup:build-dev": "cd .. && rollup -c x-dev/rollupjs/rollup.config.cjs --environment BUILD:dev",
+    "rollup:build-prod": "cd .. && rollup -c x-dev/rollupjs/rollup.config.cjs --environment BUILD:prod"
   },
   "author": "Don Parakin",
-  "license": "COPYRIGHT",
+  "license": "UNLICENSED",
   "dependencies": {
+    "bulma": "*",
+    "alpinejs": "^3.4",
+    "@alpinejs/collapse": "*",
+    "sass": "*",
+    "rollup": "*",
+    "rollup-plugin-delete": "*",
+    "rollup-plugin-scss": "*",
+    "rollup-plugin-terser": "*",
+    "rollup-plugin-sizes": "*"
   },
   "repository": {
     "type": "git",
