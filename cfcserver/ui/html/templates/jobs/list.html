@@ -1,0 +1,27 @@
+{%- extends "base.html" %}
+
+{%- block main %}
+   <a class="button is-warning is-pulled-right" href="/office/jobs/upload/">Upload a job</a>
+   <h2 class="title mt-3">Jobs - List</h2>
+   <table class="table is-fullwidth">
+    <thead>
+     <tr>
+      <th>Name</th><th>Title</th><th>Status</th><th></th>
+     </tr>
+    </thead>
+    <tbody>
+    {%- for job in vm.jobs_list  %}
+     <tr>
+      <td>{{ job.name }}</td>
+      {%- if job.error %}
+      <td colspan="9">{{ job.error }}</td>
+      {%- else %}
+      <td>{{ job.title }}</td>
+      <td>{{ job.status }}</td>
+      <td><a class="" href="/office/jobs/view?j={{ job.name }}">VIEW</a></td>
+      {%- endif %}
+     </tr>
+    {%- endfor %}
+    </tbody>
+   </table>
+{%- endblock %}

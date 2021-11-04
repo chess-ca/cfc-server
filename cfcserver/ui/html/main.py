@@ -9,7 +9,9 @@ from cfcserver.models.appconfig import AppConfig
 _routing_rules = [
     ('/', 'main.home'),
     ('/si/<action>/', 'auth.signin'),
-    ('/jobs/<action>/', 'jobs.main')
+    ('/jobs/', 'jobs.list'),
+    ('/jobs/upload/', 'jobs.upload'),
+    ('/jobs/view/<job_name>', 'jobs.view'),
 ]
 
 
