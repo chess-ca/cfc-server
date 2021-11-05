@@ -30,7 +30,7 @@ class AppConfig(AppConfigBase):
     CFCDB: cb4py_sqla.VersionedSQLiteDB
     RATINGS_AUDIT_EXTRACT_FILE: str
 
-    STATIC_BUILT_URL: str = '/static/built-unset/{}'
+    STATIC_BUILT_URL: str = '/static/built.unset/{}'
 
     # @@@@@@@@@@@@@@@@@@@ TODO: V2-Deprecate
     dao = None

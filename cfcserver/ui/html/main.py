@@ -43,7 +43,7 @@ def home():
 
 
 def get_built_url():
-    built_confg_fn = Path(__file__).resolve().parents[2] / 'static-src/built-config.cjs'
+    built_confg_fn = Path(__file__).resolve().parents[2] / 'static-src/built.config.cjs'
     with open(built_confg_fn, 'rt') as bc:
         built_config = str(bc.read())
     pattern = r'dest_dir\s*=\s*["\']([^"\']*)["\']'
