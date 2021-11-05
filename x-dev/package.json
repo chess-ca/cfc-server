@@ -17,6 +17,7 @@
     "@alpinejs/collapse": "*",
     "sass": "*",
     "rollup": "*",
+    "@rollup/plugin-node-resolve": "*",
     "rollup-plugin-delete": "*",
     "rollup-plugin-scss": "*",
     "rollup-plugin-terser": "*",
