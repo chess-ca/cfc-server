@@ -22,6 +22,7 @@ class AppConfig(AppConfigBase):
     AUTH_GOOGLE_CLIENT_ID = ''
     AUTH_GOOGLE_CLIENT_SECRET = ''
     AUTH_EMAILS = ''
+    IS_PROD = True
 
     # -------- UI Config
     RATINGS_CACHE_MAXAGE: str = '600'
@@ -52,6 +53,7 @@ class AppConfig(AppConfigBase):
             'AUTH_GOOGLE_CLIENT_ID', 'AUTH_GOOGLE_CLIENT_SECRET',
             'AUTH_EMAILS',
         ])
+        cls.IS_PROD = not cls.ENV.startswith('dev')
 
         cls.CFCDB = cb4py_sqla.VersionedSQLiteDB(
             prefix='cfcdb',

@@ -1,28 +1,27 @@
 
 import re
-from pathlib import Path
 import flask as _flask
 import codeboy4py.flask.routing as cb4py_routing
+from .utils import render_svelte, get_built_url_format
 from .auth import auth
 from cfcserver.models.appconfig import AppConfig
 
 _routing_rules = [
     ('/', 'main.home'),
     ('/si/<action>/', 'auth.signin'),
-    ('/jobs/', 'jobs.list'),
-    ('/jobs/upload/', 'jobs.upload'),
-    ('/jobs/view/<job_name>', 'jobs.view'),
+    ('/jobs/', 'jobs.job_list'),
+    ('/jobs/upload/', 'jobs.job_upload'),
+    ('/jobs/view/<job_name>', 'jobs.job_view'),
 ]
 
 
 def initialize(app):
     ui_html = _flask.Blueprint('ui_html', __name__, template_folder='templates')
 
-    def jinja_built_url(file_path):
+    AppConfig.STATIC_BUILT_URL = get_built_url_format()
+    def url_for_built(file_path):
         return AppConfig.STATIC_BUILT_URL.format(file_path)
-    app.jinja_env.globals['built_url'] = jinja_built_url
-    built_dir = get_built_url()
-    AppConfig.STATIC_BUILT_URL = f'/static/{built_dir}/{{}}'
+    app.jinja_env.globals['url_for_built'] = url_for_built
 
     rd = cb4py_routing.RouteDefiner(ui_html)
     rd.set_rule_prefix('/office')
@@ -39,15 +38,4 @@ def initialize(app):
 
 @auth
 def home():
-    return _flask.render_template('home.html')
-
-
-def get_built_url():
-    built_confg_fn = Path(__file__).resolve().parents[2] / 'static-src/built.config.cjs'
-    with open(built_confg_fn, 'rt') as bc:
-        built_config = str(bc.read())
-    pattern = r'dest_dir\s*=\s*["\']([^"\']*)["\']'
-    s = re.search(pattern, built_config)
-    built_dir = s.group(1) if s else 'NOT_SET'
-    return built_dir
-
+    return render_svelte('Home')

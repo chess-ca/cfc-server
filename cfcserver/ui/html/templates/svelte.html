@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+{%- set page_lang = 'en' if page_lang is undefined else page_lang %}
+
+<html lang="{{ page_lang }}">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>CFC Office</title>
+ <link rel="stylesheet" href="{{ url_for_built('site.css') }}">
+</head>
+{%- if page_component is defined %}
+<body data-page-component="{{ page_component }}">
+{%- else %}
+<body>
+{%- endif %}
+ <script id="page-vm" type="application/json">
+{{ page_json | safe }}
+ </script>
+{%- if page_body is defined %}
+ {{ page_body | safe }}
+{%- endif %}
+ <script src="{{ url_for_built('site.js') }}"></script>
+</body>
+</html>

@@ -3,6 +3,7 @@ import flask as _flask
 import functools, time
 from cfcserver.services import auth as s_auth
 from codeboy4py.flask.idioms import get_query_string_values
+from .utils import render_svelte
 
 _auth_callback = 'office/si/cb'
 
@@ -47,7 +48,7 @@ def signin_prompt(signout=False, timeout=False):
     auth_callback = _flask.request.host_url + _auth_callback
     vm.auth_code_reqs = s_auth.auth_code_request(auth_callback)
     # TODO: save auth_req.state in session.
-    return _flask.render_template('auth/signin.html', vm=vm, is_signin_page=True)
+    return render_svelte('SignIn', vm)
 
 
 def signin_callback():

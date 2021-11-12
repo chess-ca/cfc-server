@@ -50,7 +50,7 @@ def _run_flask_with_development_server():
         # Ref: https://flask.palletsprojects.com/en/1.1.x/config/#environment-and-debug-features
         os.environ['FLASK_ENV'] = 'development'
         os.environ['FLASK_DEBUG'] = '1'
-    flask_app = _initialize_flask()
+    flask_app = _initialize_flask(is_dev=True)
     flask_app.run()
 
 
@@ -62,7 +62,7 @@ def _run_command_line_interface():
     ui_cli.run()
 
 
-def _initialize_flask():
+def _initialize_flask(is_dev=False):
     from flask import Flask
     from flask_cors import CORS
     flask_app = Flask(__name__.split('.')[0])
@@ -70,6 +70,7 @@ def _initialize_flask():
     CORS(flask_app)
     flask_app.config['JSON_SORT_KEYS'] = False
     flask_app.secret_key = os.environ.get('APP_SECRET_KEY', 'secret-for-dev-only')
+    flask_app.context_processor(lambda: dict(is_dev=is_dev))
 
     import cfcserver.ui.api as ui_api
     import cfcserver.ui.html as ui_html
