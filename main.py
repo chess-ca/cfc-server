@@ -12,7 +12,7 @@ Args:
     (other args for CLI: see ui/cli/run.py:_parse_args()
 """
 
-import sys, os
+import sys, os, logging
 if sys.version_info < (3,7):    # 3.7+ for dataclasses; 3.6+ for f-strings; ...
     raise Exception('Python version 3.7 or later is required')
 from pathlib import Path
@@ -64,11 +64,10 @@ def _run_command_line_interface():
 
 def _initialize_flask(is_dev=False):
     from flask import Flask
-    from flask_cors import CORS
     flask_app = Flask(__name__.split('.')[0])
     flask_app.static_folder = 'cfcserver/static'
-    CORS(flask_app)
     flask_app.config['JSON_SORT_KEYS'] = False
+    flask_app.config['UPLOAD_FOLDER'] = r'C:\_\IT\Projects\CFC\CFC-Server\CFC-server.Code\app_local\tmp'
     flask_app.secret_key = os.environ.get('APP_SECRET_KEY', 'secret-for-dev-only')
     flask_app.context_processor(lambda: dict(is_dev=is_dev))
 

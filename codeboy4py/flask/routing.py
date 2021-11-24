@@ -1,10 +1,9 @@
 
-import logging as log
-from werkzeug.utils import import_string, cached_property
+import importlib
 
 
 # ----------------------------------------------------------------------
-class RouteDefiner(object):
+class RouteDefiner:
     """
     Reduces repetition & boilerplate when defining routes for Flask.
     Set app/blueprint, rule prefix, import prefix just once and they
@@ -12,49 +11,50 @@ class RouteDefiner(object):
     ALSO, lazy import of handlers (so the entire app need not be loaded
     and initialized during start-up or the 1st request).
     """
-    def __init__(self, flask_app_or_blueprint, rule_prefix='', import_prefix=''):
-        self.app_or_blueprint = flask_app_or_blueprint
-        self.rule_prefix = rule_prefix
-        self.import_prefix = import_prefix
+    @staticmethod
+    def add_rules(flask_app_or_blueprint, rule_list):
+        """Add Flask URL routing rules. Rules in the list can be:
 
-    def set_rule_prefix(self, rule_prefix):
-        self.rule_prefix = rule_prefix
+        - ['SET_URL_PREFIX', '/url/base']
+        - ['SET_IMPORT_PREFIX', 'package1.package2.']
+        - [ url, import_callable, methods_list=["GET"], endpoint=<calculated>]
 
-    def set_import_prefix(self, import_prefix):
-        self.import_prefix = import_prefix
-
-    def add_url_rule(self, rule, import_name, endpoint=None, **options):
+        :param flask_app_or_blueprint:
+        :param rule_list: List of rules.
         """
-        :param options: Passed to Werkzeug routing. Most common:
-            - methods=['GET','POST'] ; default is ['GET']
-        """
-        handler = self.import_prefix + import_name
-        endpoint = endpoint or import_name.lstrip('.').replace('.', '_')
-        self.app_or_blueprint.add_url_rule(
-            self.rule_prefix + rule,
-            endpoint=endpoint,
-            view_func=_LazyView(handler),
-            **options
-        )
-        # NOTE: For endpoint, cannot have "."; Flask will auto-prepend blueprint name.
-
-    def add_url_rules(self, rule_list):
-        # rule = (rule_url, import_name[, methods])
+        url_prefix = ''
+        import_prefix = ''
         for rule in rule_list:
-            m_list = rule[3] if len(rule) > 2 else ['GET']
-            self.add_url_rule(rule=rule[0], import_name=rule[1], methods=m_list)
+            if rule[0] == 'SET_URL_PREFIX':
+                url_prefix = rule[1]
+            elif rule[0] == 'SET_IMPORT_PREFIX':
+                import_prefix = rule[1]
+            else:
+                url = url_prefix + rule[0]
+                handler = import_prefix + rule[1]
+                methods = rule[2] if len(rule) > 2 else ['GET']
+                endpoint = rule[3] if len(rule) > 3 \
+                        else rule[1].lstrip('.').replace('.', '_')
+                flask_app_or_blueprint.add_url_rule(
+                    url,
+                    endpoint=endpoint,
+                    view_func=_LazyView(handler),
+                    methods=methods,
+                )
 
 
-# ----------------------------------------------------------------------
-class _LazyView(object):
-    """Ref: https://flask.palletsprojects.com/en/1.1.x/patterns/lazyloading/"""
-    def __init__(self, import_name):
-        self.__module__, self.__name__ = import_name.rsplit('.', 1)
-        self.import_name = import_name
-
-    @cached_property
-    def view(self):
-        return import_string(self.import_name)
+class _LazyView:
+    # Based on https://flask.palletsprojects.com/en/1.1.x/patterns/lazyloading/
+    # but with Werkzeug funcs replaced by Python 3 importlib funcs.
+    def __init__(self, import_module_name):
+        self.__module__, self.__name__ = import_module_name.rsplit('.', 1)
+        self.func = None
 
     def __call__(self, *args, **kwargs):
-        return self.view(*args, **kwargs)
+        if self.func is None:
+            module = importlib.import_module(self.__module__)
+            if hasattr(module, self.__name__):
+                self.func = getattr(module, self.__name__)
+            else:
+                raise ImportError(f'Import not found: {self.__module__}.{self.__name__}')
+        return self.func(*args, **kwargs)
