@@ -23,7 +23,6 @@ def auth_code_request(callback_url: str) -> types.SimpleNamespace:
 
 
 def auth_code_to_userinfo(callback_url: str, code: str, state: str) -> types.SimpleNamespace:
-    print(f'code="{code}", state="{state}"')
     if state.startswith('g-'):
         return _get_userinfo_from_google(callback_url, code)
     raise NotImplementedError(f'Unexpected state="{state[:6]}..." does not indicate Auth Provider')
@@ -48,7 +47,6 @@ def _get_userinfo_from_google(callback_url, code):
     try:
         with urllib.request.urlopen(request) as rsp:
             token = json.load(rsp)
-            print(f'code2token = {type(token)}: {token.keys()}')
     except urllib.error.HTTPError as e:
         ret.error = f'HTTPError (get token): {e.code}: {e.reason}'
         return ret
@@ -65,7 +63,6 @@ def _get_userinfo_from_google(callback_url, code):
     try:
         with urllib.request.urlopen(request) as rsp:
             userinfo = json.load(rsp)
-            print(f'userinfo = {type(userinfo)}: {userinfo.keys()}')
     except urllib.error.HTTPError as e:
         ret.error = f'HTTPError (get userinfo): {e.code}: {e.reason}'
         return ret
@@ -77,5 +74,4 @@ def _get_userinfo_from_google(callback_url, code):
 
 
 def is_authorized(email):
-    print(_authorized_emails)
     return email in _authorized_emails
