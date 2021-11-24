@@ -4,10 +4,11 @@ import Home from './pages_main/Home.svelte';
 import SignIn from './pages_main/SignIn.svelte';
 import UnderConstruction from './pages_main/UnderConstruction.svelte';
 import JobList from './pages_jobs/JobList.svelte';
+import JobUpload from './pages_jobs/JobUpload.svelte';
 
 const page_components = {
     Home, SignIn, UnderConstruction,
-    JobList
+    JobList, JobUpload
 }
 
 const el_body = document.getElementsByTagName('body')[0];
