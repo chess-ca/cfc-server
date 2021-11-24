@@ -1,7 +1,7 @@
 <script>
- import AppBodySignedIn from '../page_layouts/AppBodySignedIn.svelte';
+    import AppBodySignedIn from '../page_layouts/AppBodySignedIn.svelte';
 
- export let job_list = []
+    export let job_list = []
 </script>
 
 <AppBodySignedIn>
@@ -10,21 +10,22 @@
  <table class="table is-fullwidth">
   <thead>
   <tr>
-   <th>Name</th><th>Title</th><th>Status</th><th></th>
+   <th>Last Update &#8595;</th><th>Name</th><th>Description</th><th>Status</th><th></th>
   </tr>
   </thead>
   <tbody>
   {#each job_list as job }
-  <tr>
-   <td>{ job.name }</td>
-   {#if job.error}
-   <td colspan="9">{ job.error }</td>
-   {:else}
-   <td>{ job.title }</td>
-   <td>{ job.status }</td>
-   <td><a class="" href="/office/jobs/view?j={ job.name }">VIEW</a></td>
-   {/if}
-  </tr>
+   <tr>
+    <td>{ job.dt_last }</td>
+    <td>{ job.name }</td>
+    {#if job.error}
+     <td colspan="9">{ job.error }</td>
+    {:else}
+     <td>{ job.title }</td>
+     <td>{ job.status }</td>
+     <td><a class="" href="/office/jobs/{ job.name }">VIEW</a></td>
+    {/if}
+   </tr>
   {/each}
   </tbody>
  </table>

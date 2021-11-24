@@ -6,7 +6,11 @@ from .utils import render_svelte
 
 @auth
 def job_list():
-    vm = {'job_list': s_jobs.jobs_list()}
+    job_list = sorted(
+        s_jobs.jobs_list(),
+        key=lambda j: j.uts_last, reverse=True
+    )
+    vm = {'job_list': job_list}
     return render_svelte('JobList', vm)
 
 
