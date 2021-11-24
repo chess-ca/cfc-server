@@ -8,25 +8,35 @@ from .utils import render_svelte
 _auth_callback = 'office/si/cb'
 
 
-def auth(func, signed_in=True, required_roles=None):
-    @functools.wraps(func)
-    def decorated_func(*args, **kwargs):
-        if signed_in or required_roles:
-            # ---- User must be signed-in (have an active session)
-            if 'auth_id' not in _flask.session:
-                return _flask.redirect('/office/si/p')
+def auth(*args, signed_in=True, required_roles=None, api=False):
+    def the_real_decorator(func):
+        @functools.wraps(func)
+        def decorated_func(*args, **kwargs):
+            if signed_in or required_roles:
+                # ---- User must be signed-in (have an active session)
+                if 'auth_id' not in _flask.session:
+                    return _flask.abort(401) if api \
+                        else _flask.redirect('/office/si/p')
 
-            now_ts = int(time.time())
-            elapsed_time = now_ts - int(_flask.session.get('auth_ts', 0))
-            if elapsed_time > 2*60*60:
-                return _flask.redirect('/office/si/to?next=' + _flask.request.full_path)
-            _flask.session['auth_ts'] = now_ts
+                now_ts = int(time.time())
+                elapsed_time = now_ts - int(_flask.session.get('auth_ts', 0))
+                if elapsed_time > 2*60*60:
+                    return _flask.abort(401) if api \
+                        else _flask.redirect('/office/si/to?next=' + _flask.request.full_path)
+                _flask.session['auth_ts'] = now_ts
 
-        if required_roles:
-            # ---- User must have all required roles
-            pass
-        return func(*args, **kwargs)
-    return decorated_func
+            if required_roles:
+                # ---- User must have all required roles
+                pass    # to be implemented
+            return func(*args, **kwargs)
+        return decorated_func
+
+    if len(args) == 0:
+        # Was called with key word args. Return the decorator.
+        return the_real_decorator
+    else:
+        # Was called without key word args. Return the decorated function.
+        return the_real_decorator(args[0])
 
 
 def signin(action):
