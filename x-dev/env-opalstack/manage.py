@@ -50,6 +50,8 @@ def action_deploy():
     venv_dir = venv_create(deploy_dir)
     pip_install_requirements(deploy_dir, venv_dir)
     pip_install_uwsgi(venv_dir)
+    npm_install(deploy_dir)
+    rollupjs_build(deploy_dir)
     set_current_deploy(deploy_dir)
     restart_uwsgi(application_dir)
 
@@ -123,6 +125,7 @@ def git_clone(deploy_dir):
 
 def venv_create(deploy_dir):
     log.info('---- ---- venv create')
+    os.chdir(str(deploy_dir))
     venv_dir = deploy_dir / 'venv'
     cmd = [python_bin, '-m', 'venv', str(venv_dir), '--prompt', deploy_dir.name, '--upgrade-deps']
     cp = subprocess.run(cmd)
@@ -132,6 +135,7 @@ def venv_create(deploy_dir):
 
 def pip_install_requirements(deploy_dir, venv_dir):
     log.info('---- ---- pip install -r requirements.frozen.txt')
+    os.chdir(str(deploy_dir))
     os_env = os.environ.copy()
     os_env['VIRTUAL_ENV'] = str(venv_dir)
     os_env['PATH'] = '{}/bin:{}'.format(venv_dir, os_env['PATH'])
@@ -149,8 +153,23 @@ def pip_install_uwsgi(venv_dir):
     subprocess.run(cmd, env=os_env, check=True)
 
 
+def npm_install(deploy_dir):
+    log.info('---- ---- npm install')
+    os.chdir(str(deploy_dir / 'x-dev'))
+    cmd = ['npm', 'install']
+    subprocess.run(cmd, check=True)
+
+
+def rollupjs_build(deploy_dir):
+    log.info('---- ---- rollupjs build')
+    os.chdir(str(deploy_dir / 'x-dev'))
+    cmd = ['npm', 'run', 'rollup:build-prod']
+    subprocess.run(cmd, check=True)
+
+
 def set_current_deploy(deploy_dir):
     log.info('---- ---- set ./deployed -> ./' + deploy_dir.name)
+    os.chdir(str(deploy_dir.parent))
     cmd = ['ln', '-fns', deploy_dir.name, 'deployed']
     subprocess.run(cmd, check=True)
 
