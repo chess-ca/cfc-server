@@ -3,7 +3,10 @@ import re
 import pytz, zipfile, configparser
 from datetime import datetime, timedelta, tzinfo
 from pathlib import Path
-from codeboy4py.py.zipfile import SimpleZipFile
+from types import SimpleNamespace
+
+_job_info = ['dir', 'dirname', 'title', 'status', 'run_type', 'comments', 'error',
+    'created_dt', 'update_dt', 'updated_uts', 'log']
 
 
 class Job:
@@ -17,6 +20,14 @@ class Job:
     - When running jobs, only valid/unpacked jobs are considered.
     """
     def __init__(self, job_dir, timezone='UTC'):
+        """
+        - NOTE: Instead of raising an Exception, invalid Jobs store the
+          error in self.error.  This allows use in list comprehensions
+          without breaking if an invalid job is encountered.
+
+        :param job_dir:
+        :param timezone:
+        """
         self.dir: Path = Path(job_dir).resolve()
         self.timezone: str = timezone
 
@@ -26,26 +37,77 @@ class Job:
         self.run_after: str = '???'
         self.run_attempts: int = 0
 
-        self._cparser = None
         self.ini_path: Path = job_dir / 'job.ini'
         self.log_path: Path = job_dir / 'job.log'
         self.tz: tzinfo = pytz.timezone(self.timezone)
 
+        self._cparser = None
+
+        # ---- job directory
         if not self.dir.exists():
-            self.error = f'Job directory not found: {self.dir}'
+            self.error = f'Invalid job: directory not found: {self.dir}'
             return
+        if not self.dir.is_dir():
+            self.error = f'Invalid job: not a directory: {self.dir}'
+            return
+        self.dirname = self.dir.name
+
+        # ---- job.log
+        self.updated_dt, self.updated_uts = self.get_updated()
+
+        # ---- *.zip
+        zip_fnames = [fn for fn in self.dir.glob('*.zip')]
+        if len(zip_fnames) < 1:
+            self.error = f'Invalid job: *.zip file is missing: {self.dir}'
+            return
+        if len(zip_fnames) > 1:
+            self.error = f'Invalid job: Multiple *.zip files found: {self.dir}'
+            return
+        self.zip_path = Path(zip_fnames[0]).resolve()
+
+        # ---- job.ini
         if not self.ini_path.exists():
             self.error = f'Invalid job: "job.ini" not found: {self.dir}'
             return
+        cp = self._get_cparser()
+        if not cp.has_section('JOB'):
+            self.error = f'Invalid job: "job.ini" missing "JOB" section: {self.dir}'
+            return
+        if not cp.has_section('RUN'):
+            self.error = f'Invalid job: "job.ini" missing "RUN" section: {self.dir}'
+            return
+        job_section = cp['JOB']
+        run_section = cp['RUN']
 
-        zip_fnames = [fn for fn in job_dir.glob('*.zip')]
-        if len(zip_fnames) < 1:
-            self.error = f'Invalid job: *.zip file is missing: {job_dir}'
-            return
-        if len(zip_fnames) > 1:
-            self.error = f'Invalid job: Multiple *.zip files found: {job_dir}'
-            return
-        self.zip_path = Path(zip_fnames[0]).resolve()
+        self.title = job_section.get('title', '???')
+        self.status = run_section.get('status', '???')
+        self.run_type = run_section.get('run_type', None) \
+                     or job_section.get('run_type', None) \
+                     or job_section.get('handler', '???')
+        self.comments = job_section.get('comments', None)
+        self.created_dt = job_section.get('created', '').rsplit('.', 1)[0]
+
+    def get_info(self, details=''):
+        """Get Job info (suitable for JSON, etc)"""
+        info = SimpleNamespace(**{n: None for n in _job_info})
+        info.dir = str(self.dir)
+        if self.error:
+            info.status = 'error'
+            info.error = self.error
+            info.updated_dt = getattr(self, 'updated_dt', 0),
+            info.updated_uts = getattr(self, 'updated_uts', 0),    # for sorting lambdas
+            return info
+
+        info.dirname = self.dirname
+        info.title = self.title,
+        info.status = self.status,
+        info.run_type = self.run_type,
+        info.comments = self.comments,
+        info.created_dt = self.created_dt,
+        info.updated_dt = self.updated_dt,
+        info.updated_uts = self.updated_uts,
+        info.log = self.get_log() if 'log' in details else None,
+        return info
 
     @staticmethod
     def unpack(job_dir, timezone='UTC'):
@@ -138,7 +200,7 @@ class Job:
             with open(str(self.ini_path), 'wt') as ini_f:
                 self._cparser.write(ini_f)
 
-    def _get_cparser(self):
+    def _get_cparser(self) -> configparser.ConfigParser:
         if self._cparser is None:
             self._cparser = configparser.ConfigParser()
             self._cparser.read(str(self.ini_path))
@@ -155,8 +217,6 @@ class Job:
         with open(str(self.log_path), 'rt') as log_f:
             log = log_f.read()
         return log
-
-    # @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
     def get_file_names(self, pattern=None):
         """Get list of files in the job's *.zip file"""
@@ -189,5 +249,10 @@ class Job:
         if add_ts:
             now = datetime.now(tz=self.tz)
             ts = now.strftime('%Y-%m-%d-%H:%M:%S: ')
-        with open(str(self.log_path), 'at', encoding='utf-8') as log:
-            log.write(ts + sep.join(text) + '\n')
+        with open(str(self.log_path), 'at', encoding='utf-8') as log_f:
+            log_f.write(ts + sep.join(text) + '\n')
+
+    def get_log(self):
+        with open(str(self.log_path), 'rt', encoding='utf-8') as log_f:
+            log_contents = log_f.read()
+        return log_contents
