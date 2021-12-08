@@ -23,65 +23,56 @@
             url: '/office/jobs/upload/',
             vars: {},
             file_obj: files[0],
-            onProgress: onProgress,
-            onComplete: onComplete,
-            onError: onError,
-            onAbort: onAbort,
+            onProgress: (e) => { upload_progress = Math.floor(100 * e.loaded / e.total); },
+            onComplete: (e) => { ui_stage = 3; },
+            onError: (e) => { ui_stage = 3; upload_error = true; },
+            onAbort: (e) => { ui_stage = 3; upload_abort = true; },
         });
-    }
-
-    function onProgress(event) {
-        const p = Math.floor(100 * event.loaded / event.total);
-        console.log('File upload: progress:', p, '%');
-        upload_progress = p;
-    }
-    function onComplete(event) {
-        ui_stage = 3;
-    }
-    function onError(event) {
-        ui_stage = 3;
-        upload_error = true;
-        console.error('API call: error:', event)
-    }
-    function onAbort(event) {
-        ui_stage = 3;
-        upload_abort = true;
-        console.error('API call: abort:', event)
     }
 </script>
 
 <AppBodySignedIn>
  <h2 class="title mt-3">Jobs - Upload</h2>
- <form method="post" enctype="multipart/form-data">
-  <div class="field">
-   <div class="file is-small is-warning has-name">
-    <label class="file-label">
-     <input class="file-input" type="file" bind:files={files} disabled={ui_stage > 1} on:change={()=>files_error=''} accept=".zip">
-     <span class="file-cta">
-       <span class="file-label">Choose a file...</span>
-     </span>
-     <span class="file-name">{file_name}</span>
-    </label>
+  <form method="post" enctype="multipart/form-data">
+   <div class="field">
+    <div class="file is-small is-warning has-name">
+     <label class="file-label">
+      <input class="file-input" type="file" bind:files={files} disabled={ui_stage > 1} on:change={()=>files_error=''} accept=".zip">
+      <span class="file-cta">
+        <span class="file-label">
+         {#if ui_stage === 1}Choose a file...{:else}File...{/if}
+        </span>
+      </span>
+      <span class="file-name">{file_name}</span>
+     </label>
+    </div>
+    {#if files_error }<p class="help is-danger">{file_name}</p>{/if}
    </div>
-   {#if files_error }<p class="help is-danger">{file_name}</p>{/if}
-  </div>
-
-  {#if ui_stage === 1}
-   <button class="button is-warning mt-3" on:click={do_upload}>Upload</button>
-  {/if}
-  {#if ui_stage === 2}
-   <p>Uploading ... { upload_progress }%</p>
-  {/if}
-  {#if ui_stage === 3}
-   {#if upload_error}
-    <p>Upload ERROR. See console log.</p>
-   {:else if upload_abort}
-    <p>Upload ABORTED.</p>
-   {:else }
-    <p>Upload ... DONE!</p>
+   {#if ui_stage === 1}
+    <button class="button is-warning mt-3" on:click|preventDefault={do_upload}>Upload</button>
    {/if}
-   <a class="button is-warning mt-3" href="/office/jobs/">Continue</a>
-  {/if}
+  </form>
 
- </form>
+ {#if ui_stage === 2}
+  <br>
+  <p>Uploading ... { upload_progress }%</p>
+ {/if}
+
+ {#if ui_stage === 3}
+  <br>
+  {#if upload_error}
+   <p>Upload ERROR. See console log.</p>
+  {:else if upload_abort}
+   <p>Upload ABORTED.</p>
+  {:else }
+   <p>Upload ... DONE!</p>
+  {/if}
+  <a class="button is-warning mt-3" href="/office/jobs/">Continue &rarr;</a>
+  <br><br><br><br>
+  <p>
+   Note: The job will have a "uploaded" status until it runs.
+   It may take up to 20 minutes before the job runs.
+  </p>
+ {/if}
+
 </AppBodySignedIn>

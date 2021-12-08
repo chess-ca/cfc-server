@@ -2,20 +2,49 @@
 import pathlib, configparser, datetime, pytz
 from types import SimpleNamespace
 from codeboy4py.py.zipfile import SimpleZipFile
+from codeboy4py.py.jobs import Job
 from cfcserver.models.appconfig import AppConfig
 
-_job_attrs = ['name', 'title', 'handler', 'status', 'comments', 'error',
-    'dt_created', 'dt_uploaded', 'dt_last', 'uts_last', 'log']
+_job_attrs = ['dirname', 'title', 'status', 'run_type', 'comments', 'error',
+    'created_dt', 'update_dt', 'updated_uts', 'log']
 _tz_eastern = pytz.timezone('Canada/Eastern')
 
 
-def jobs_list() -> list:
+def jobs_list(details='') -> list:
     jobs_dir = pathlib.Path(AppConfig.JOBS_DIR)
     job_list = []
     for job_dir in jobs_dir.iterdir():
-        if not job_dir.is_dir(): continue
-        job = job_info(job_dir.name, details=0)
-        job_list.append(job)
+        if not job_dir.is_dir():
+            continue
+        jobini = job_dir / 'job.ini'
+        if not jobini.exists():
+            continue    # its not a Job directory
+
+        j = SimpleNamespace(**{ k: None for k in _job_attrs })
+        try:
+            job = Job(job_dir)
+        except ValueError as ve:
+            continue    # not a valid job; don't include in list
+
+        j.dirname =job_dir.name
+        j.title = job.ini_get('JOB', 'title', default='???')
+        j.status = job.ini_get('RUN', 'status', default='???')
+        j.run_type = job.ini_get('RUN', 'run_type', default=None) \
+            or job.ini_get('JOB', 'run_type', default=None) \
+            or job.ini_get('JOB', 'handler', default='???')
+        j.comments = job.ini_get('JOB', 'comments')
+        j.created_dt = job.ini_get('JOB', 'created', default='')
+        j.created_dt = str(j.created_dt).rsplit('.', 1)[0]
+        j.updated_dt, j.updated_uts = job.get_updated()
+
+        if ('log' in details):
+            if not job.log_path.exists():
+                j.log = '(not found)'
+            else:
+                with open(str(job.log_path), 'rt') as log_f:
+                    j.log = log_f.read()
+
+        job_list.append(j)
     return job_list
 
 

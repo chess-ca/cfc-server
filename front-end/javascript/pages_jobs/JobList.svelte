@@ -10,21 +10,16 @@
  <table class="table is-fullwidth">
   <thead>
   <tr>
-   <th>Last Update &#8595;</th><th>Name</th><th>Description</th><th>Status</th><th></th>
+   <th>Last Update &#8595;</th><th>Title</th><th>Status</th><th></th>
   </tr>
   </thead>
   <tbody>
   {#each job_list as job }
    <tr>
-    <td>{ job.dt_last }</td>
-    <td>{ job.name }</td>
-    {#if job.error}
-     <td colspan="9">{ job.error }</td>
-    {:else}
-     <td>{ job.title }</td>
-     <td>{ job.status }</td>
-     <td><a class="" href="/office/jobs/{ job.name }">VIEW</a></td>
-    {/if}
+    <td>{ job.updated_dt }</td>
+    <td>{ job.title }</td>
+    <td>{ job.status }</td>
+    <td><a class="" href="/office/jobs/{ job.dirname }">VIEW</a></td>
    </tr>
   {/each}
   </tbody>

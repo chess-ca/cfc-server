@@ -32,6 +32,7 @@ class AppConfig(AppConfigBase):
     RATINGS_AUDIT_EXTRACT_FILE: str
 
     STATIC_BUILT_URL: str = '/static/built.unset/{}'
+    PYTZ_TIMEZONE = 'Canada/Eastern'
 
     # @@@@@@@@@@@@@@@@@@@ TODO: V2-Deprecate
     dao = None
