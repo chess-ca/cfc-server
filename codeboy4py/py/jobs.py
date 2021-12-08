@@ -166,7 +166,7 @@ class Job:
         # ---- job.log
         log = []
         if not joblog.exists():
-            created = cp.get('JOB', 'created', fallback='')
+            created = cp.get('JOB', 'created', fallback='').replace(' ', '-')
             if '.' in created:      # if fractional seconds:
                 created = created[:created.rfind('.')]
             created = created.split('.', maxsplit=1)[0]  # drop fractions

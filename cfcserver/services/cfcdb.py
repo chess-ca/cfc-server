@@ -5,7 +5,7 @@ from cfcserver import AppConfig
 from cfcserver.gateways import ds_job
 from cfcserver.gateways import ds_cfcdb
 
-log = logging.getLogger('cfcserver')
+log: logging.Logger
 
 
 def create(job_dir):
@@ -25,11 +25,14 @@ def create(job_dir):
 
 
 def _initialize(job_dir):
+    global log
     job_dir = Path(AppConfig.JOBS_DIR, job_dir).resolve()
     if not job_dir.exists():
         sys.exit(f'ERROR: Job directory not found: {job_dir}')
 
-    log_format = logging.Formatter("%(asctime)s: %(message)s")
+    log = logging.getLogger(str(job_dir))
+    log.setLevel(logging.INFO)
+    log_format = logging.Formatter('%(asctime)s: %(message)s', datefmt='%Y-%m-%d-%H:%M:%S')
     log_handler = logging.FileHandler(str(Path(job_dir, 'job.log')))
     log_handler.setFormatter(log_format)
     log.addHandler(log_handler)
