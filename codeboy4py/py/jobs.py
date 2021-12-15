@@ -1,5 +1,4 @@
-import re
-
+import io, re
 import pytz, zipfile, configparser
 from datetime import datetime, timedelta, tzinfo
 from pathlib import Path
@@ -110,7 +109,7 @@ class Job:
         return info
 
     @staticmethod
-    def unpack(job_dir, timezone='UTC'):
+    def unpack(job_dir, timezone='UTC', runnable=True):
         """Unpack a job from its *.zip file (after uploading).
         :param job_dir
         """
@@ -183,6 +182,17 @@ class Job:
         with open(str(joblog), 'at') as log_f:
             log_f.writelines(log)
 
+        # ---- job.runnable (indicates that this job should run)
+        if runnable:
+            lines = (
+                f'# This file\'s name indicates the job\'s runnable status',
+                f'# - job.runnable = cron should run this job asap',
+                f'# - job.running  = cron is now running this job (or it aborted)',
+                f'# - job.ended    = cron has finished running this job',
+            )
+            with open(str(job_dir / 'job.runnable'), 'wt') as runnable_f:
+                runnable_f.write('\n'.join(lines))
+
     def ini_get(self, section, option, default=None) -> str:
         cp = self._get_cparser()
         if not cp.has_section(section):
@@ -218,16 +228,16 @@ class Job:
             log = log_f.read()
         return log
 
-    def get_file_names(self, pattern=None):
+    def file_names(self, pattern=None):
         """Get list of files in the job's *.zip file"""
         with zipfile.ZipFile(str(self.zip_path), mode='r') as zip_f:
             fn_list = zip_f.namelist()
         if pattern is None:
             return fn_list
-        fn_re = re.compile(pattern)
-        return [fn for fn in fn_list if fn_re.match(fn)]
+        fn_regex = re.compile(pattern)
+        return [fn for fn in fn_list if fn_regex.match(fn)]
 
-    def get_file_contents(self, fname, bytes=False):
+    def file_contents(self, fname, bytes=False):
         """Get contents of a file in the job's *.zip file."""
         with zipfile.ZipFile(str(self.zip_path), mode='r') as zip_f:
             if fname not in zip_f.namelist():
@@ -236,14 +246,22 @@ class Job:
             return f_bytes if bytes \
                 else f_bytes.decode('utf-8')
 
-    def get_file_obj(self, fname):
-        """Get a file-object for a file in the job's *.zip file."""
+    def file_objects(self, pattern=None, bytes=False):
+        """Return generator of file-objects for files in the job's *.zip file."""
+        fn_list = []
+        fn_regex = re.compile(pattern or r'.*')
         with zipfile.ZipFile(str(self.zip_path), mode='r') as zip_f:
-            if fname not in zip_f.namelist():
-                return None
-            f_bytes: bytes = zip_f.read(fname)
-            return f_bytes if bytes \
-                else f_bytes.decode('utf-8')
+            for fn in zip_f.namelist():
+                if fn_regex.match(fn):
+                    fn_list.append(fn)
+        fn_list = sorted(fn_list)
+
+        for fn in fn_list:
+            fn_zp = zipfile.Path(str(self.zip_path), at=fn)
+            with fn_zp.open(mode='rb') as fn_byte_f:
+                fo = fn_byte_f if bytes \
+                    else io.TextIOWrapper(fn_byte_f, 'utf-8')
+                yield fn, fo
 
     def log(self, *text, sep='\n\t', ts='', add_ts=True):
         if add_ts:

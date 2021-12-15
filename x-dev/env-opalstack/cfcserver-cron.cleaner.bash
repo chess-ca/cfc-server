@@ -10,9 +10,21 @@ JOBS_DIR=$APP_LOCAL/jobs
 JOBS_ARCHIVE_DIR=$APP_LOCAL/jobs/archive
 
 function main {
-  log $(basename $0) invoked
+  log $(basename ${0}) invoked
+  cleaning_for_databases
   cleaning_for_jobs
   cleaning_for_the_cleaner
+}
+
+function cleaning_for_databases {
+  pushd "${APP_LOCAL}/data/ratings"
+  ls -r ratings.*.sqlite | tail -n +11 | xargs -r echo rm -fr
+  ls -r ratings.*.sqlite | tail -n +11 | xargs -r rm -fr
+  popd
+  pushd "${APP_LOCAL}/data/cfcdb"
+  ls -r cfcdb.*.sqlite | tail -n +11 | xargs -r echo rm -fr
+  ls -r cfcdb.*.sqlite | tail -n +11 | xargs -r rm -fr
+  popd
 }
 
 function cleaning_for_jobs {
@@ -30,7 +42,7 @@ function cleaning_for_jobs {
   for job_log in $old_archives; do
     job_dir=$(dirname $job_log)
     log ... Deleting archived $(basename $job_dir)
-    rm -fr $job_dir
+    rm --recursive --force -- $job_dir
     done
 }
 

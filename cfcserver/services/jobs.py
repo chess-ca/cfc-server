@@ -1,5 +1,5 @@
 
-import pathlib, configparser, datetime, pytz, zipfile
+import sys, pathlib, zipfile
 from codeboy4py.py.jobs import Job
 from cfcserver.models.appconfig import AppConfig
 
@@ -20,18 +20,20 @@ def jobs_list(details='', include_invalid=False) -> list:
     return job_list
 
 
-def cli():
-    """Run jobs (from CLI or cron)"""
-    jobs_dir = pathlib.Path(AppConfig.JOBS_DIR).resolve()
-    for job_dir in jobs_dir.iterdir():
-        if not job_dir.is_dir():
-            continue
-        job = Job(job_dir, timezone=AppConfig.PYTZ_TIMEZONE)
-        if job.error is not None:
-            continue
-        if job.status == 'uploaded' or job.status == 'retrying':
-            if job.run_type == 'extract-from-cfc-mdb':
-                run_extract_from_cfc_mdb(job)
+def run_job(job_dir_basename):
+    """Run a job"""
+    job_dir = pathlib.Path(AppConfig.JOBS_DIR, job_dir_basename).resolve()
+    job = Job(job_dir, timezone=AppConfig.PYTZ_TIMEZONE)
+    if job.error:
+        return f'ERROR: {job.error}'
+    if job.status != 'uploaded' and job.status != 'retrying':
+        return f'ERROR: Cannot run job since status is not "uploaded" or "retrying"\n\tin {job_dir}'
+
+    if job.run_type == 'extract-from-cfc-mdb':
+        run_extract_from_cfc_mdb(job)
+    else:
+        return f'ERROR: Unknown run_type "{job.run_type}"\n\tin {job_dir}'
+    return None
 
 
 def run_extract_from_cfc_mdb(job: Job):
@@ -52,9 +54,16 @@ def run_extract_from_cfc_mdb(job: Job):
     ratings_create_db.create(str(job.dirname))
     job.log(f'DONE: Running ratings_created_db.create (old)')
 
+    job.log(f'START: Deleting data files extracted from *.zip')
+    for fp in job.dir.glob('members.*.csv'):
+        fp.unlink()
+    for fp in job.dir.glob('ratings.*.*.csv'):
+        fp.unlink()
+    job.log(f'DONE: Deleting data files extracted from *.zip')
+
     job.log(f'START: Running cfcdb.create (new)')
     from cfcserver.services import cfcdb
-    cfcdb.create(str(job.dirname))
+    cfcdb.create(job)
     job.log(f'DONE: Running cfcdb.create (new)')
 
     job.ini_set('RUN', 'status', 'success')

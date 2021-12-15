@@ -45,7 +45,7 @@ def job_upload_post():
     upload_file.save(str(job_dir / job_filename))
 
     try:
-        Job.unpack(job_dir, timezone=AppConfig.PYTZ_TIMEZONE)
+        Job.unpack(job_dir, timezone=AppConfig.PYTZ_TIMEZONE, runnable=True)
     except Exception as e:
         emsg = f'{type(e)}: {e.args}'
         print(emsg)

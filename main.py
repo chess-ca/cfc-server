@@ -12,9 +12,9 @@ Args:
     (other args for CLI: see ui/cli/run.py:_parse_args()
 """
 
-import sys, os, logging
+import sys, os
 if sys.version_info < (3,7):    # 3.7+ for dataclasses; 3.6+ for f-strings; ...
-    raise Exception('Python version 3.7 or later is required')
+    sys.exit('ERROR: Python version 3.7 or later is required')
 from pathlib import Path
 
 _config_file_env_var = 'CFCSERVER_CONFIG_FILE'
@@ -24,14 +24,13 @@ application = None      # Used by uWSGI
 
 
 def main():
-    if '--cli' in sys.argv:
-        _run_command_line_interface()
+
+    if __name__ != '__main__':
+        _run_flask_with_uwsgi()
     elif '--flask' in sys.argv:
         _run_flask_with_development_server()
-    elif __name__ != '__main__':
-        _run_flask_with_uwsgi()
     else:
-        raise Exception('Invalid run mode. Invoke with --cli, --flask, or from uWSGI')
+        _run_command_line_interface()
 
 
 def _run_flask_with_uwsgi():
@@ -82,11 +81,11 @@ def get_config_file():
     if '--local' in sys.argv:
         config_file = _app_root_dir / 'app_local/config/app.config.ini'
     elif _config_file_env_var not in os.environ:
-        raise Exception('Set environment var "{}" or use --local'.format(_config_file_env_var))
+        sys.exit('ERROR: Set environment var "{}" or use --local'.format(_config_file_env_var))
     else:
         config_file = Path(os.environ.get(_config_file_env_var)).resolve()
     if not config_file.exists():
-        raise FileNotFoundError('Config file not found: ' + (config_file or '(unspecified)'))
+        sys.exit('ERROR: Config file not found: ' + (config_file or '(unspecified)'))
     return str(config_file)
 
 

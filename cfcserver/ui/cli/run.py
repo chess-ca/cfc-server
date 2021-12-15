@@ -1,8 +1,7 @@
 # ======================================================================
 # CLI - Command Line Interface
 # ======================================================================
-import argparse
-from importlib import import_module
+import sys, argparse
 import logging
 log = logging.getLogger('app')
 log.setLevel(logging.INFO)
@@ -10,25 +9,27 @@ log.setLevel(logging.INFO)
 
 def run():
     args = _parse_args()
-    if args.action == 'jobs':
+    if args.job:
         from cfcserver.services import jobs as s_jobs
-        s_jobs.cli()
+        error = s_jobs.run_job(args.job)
+        if error:
+            sys.exit(error)
     elif args.action == 'r':
         from cfcserver.services import ratings_create_db
         ratings_create_db.create(args.job)
     elif args.action == 'cfcdb':
-        s_cfcdb = import_module('cfcserver.services.cfcdb')
+        from cfcserver.services import cfcdb as s_cfcdb
         s_cfcdb.create(args.job)
     else:
-        print(f'Unknown action: "{args.action}"')
+        sys.exit(f'ERROR: Unknown action: "{args.action}"')
 
 
 def _parse_args():
     ap = argparse.ArgumentParser(description='CFC-Server: command line tasks')
-    ap.add_argument('--cli', dest='action', required=True,
-        choices=['jobs', 'r', 'rc', 'cfcdb'],
+    ap.add_argument('--cli', dest='action', required=False,
+        choices=['r', 'cfcdb'],
         help='Action: rc=ratings-create; ')
-    ap.add_argument('-j', '--job', dest='job',
+    ap.add_argument('-j', '--job', dest='job', required=False,
         help='Name of the directory containing the job')
     ap.add_argument('--local', dest='is_local', action='store_true',
         help='Use local directories')
