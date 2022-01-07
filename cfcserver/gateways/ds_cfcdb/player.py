@@ -63,7 +63,8 @@ def find_top_players(
     if age_min > 0 or age_max < 99:
         birth_max = '2090-99-99' if age_min <=0 \
             else f'{now.year - 1 - age_min}-99-99'
-        birth_min = '1900-00-00' if age_max >= 99 \
+        # Must exclude fake birthdates 1901-01-01 to 1905-01-01
+        birth_min = '1905-01-02' if age_max >= 99 \
             else f'{now.year - 1 - age_max}-00-00'
         sql = sql.where(between(t_player.c.birthdate, birth_min, birth_max))
         en.append('age{}{}'.format(
