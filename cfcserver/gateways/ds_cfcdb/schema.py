@@ -44,10 +44,10 @@ t_event = Table('event', sa_metadata,
     Column('name', String(100)),
     Column('date_end', String(10)),
     Column('province', String(50)),
-    Column('arbiter_id', Integer, ForeignKey('player.cfc_id')),
     Column('organizer_id', Integer, ForeignKey('player.cfc_id')),
-    Column('pairings', String(20)),
-    Column('rating_type', String(20)),
+    Column('arbiter_id', Integer, ForeignKey('player.cfc_id')),
+    Column('pairings', String(20)),         # SS|RR
+    Column('rating_type', String(20)),      # R|Q
     Column('n_players', Integer),
     Column('n_rounds', Integer),
 )
@@ -73,6 +73,8 @@ def create_indices(dbcon):
         Index('ix_player_1', t_player.c.cfc_id),
         Index('ix_player_2', t_player.c.name_last_lc, t_player.c.name_first_lc),
         Index('ix_event_1', t_event.c.id),
+        Index('ix_event_2', t_event.c.organizer_id),
+        Index('ix_event_3', t_event.c.arbiter_id),
         Index('ix_crosstable_1', t_crosstable.c.event_id, t_crosstable.c.place),
         Index('ix_crosstable_2', t_crosstable.c.cfc_id),
     )

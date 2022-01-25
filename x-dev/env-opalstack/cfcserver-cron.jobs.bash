@@ -20,10 +20,9 @@ function main {
 
   local runnable=$(find ${APP_LOCAL}/jobs -mindepth 2 -maxdepth 2 -name job.runnable)
   for jobrunnable in ${runnable}; do
-    log Found a runnable job in $(basename ${jobrunnable})
-
     local jobdir=$(dirname ${jobrunnable})
     local jobdir_basename=$(basename ${jobdir})
+    log "... Found a runnable job in ${jobdir_basename}"
 
     mv "${jobrunnable}" "${jobdir}/job.running"
     source "${APP_ROOT}/deployed/venv/bin/activate"

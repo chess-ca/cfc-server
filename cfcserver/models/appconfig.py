@@ -59,4 +59,5 @@ class AppConfig(AppConfigBase):
         cls.CFCDB = cb4py_sqla.VersionedSQLiteDB(
             prefix='cfcdb',
             directory=cls.DATA_DIR + '/cfcdb',
+            # echo=True,    # for debugging SQL
         )

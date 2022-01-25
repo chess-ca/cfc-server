@@ -1,7 +1,7 @@
 """
 codeboy4py.py.pydantic
-- Everything the pydantic package has plus some goodies.
-- App code can import this instead of the real pydantic package.
+- Imports * so it has everything pydantic has (and more).
+  The app can import this instead of the real pydantic package.
 """
 from pydantic import *
 
@@ -10,7 +10,7 @@ class BaseModelPlus(BaseModel):
     _cb4py_pydantic_errors: list
 
     @classmethod
-    def new(cls, attrs: dict):
+    def from_dict(cls, attrs: dict):
         instance, errors = None, []
         try:
             instance = cls(**attrs)

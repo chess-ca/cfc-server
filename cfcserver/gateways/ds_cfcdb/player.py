@@ -3,34 +3,87 @@ from datetime import datetime
 import sqlalchemy as sa
 from sqlalchemy.future import select
 from sqlalchemy.sql import between
+from codeboy4py.db.sqlalchemy import dataset
 from .schema import t_player, t_event, t_crosstable
-from codeboy4py.db.sqlalchemy import RowToDict
 
-_r2d_top_players = RowToDict(table=t_player,
-    include='cfc_id cfc_expiry fide_id name_first name_last addr_city addr_province regular_rating regular_indicator quick_rating quick_indicator')
+_max_rows = 500
+
+
+class _DataSets:
+    find_by_x_0 = dataset(
+        (t_player, 'cfc_id cfc_expiry fide_id name_first name_last addr_city addr_province'
+                   ' regular_rating regular_indicator quick_rating quick_indicator'),
+    )
+
+
+def find_by_ids(
+        dbcon: sa.engine.Connection,
+        ids: list[int],
+        dataset: str = '0',
+):
+    select_cols = _DataSets.find_by_x_0 if dataset == '0' else []
+    sql = (
+        select(*select_cols)
+        .where(t_player.c.cfc_id.in_(ids))
+        .limit(_max_rows)
+    )
+    with dbcon.begin():
+        result = dbcon.execute(sql)
+        players = [row._asdict() for row in result]
+    return players
+
+
+def find_by_names(
+        dbcon: sa.engine.Connection,
+        name_first: str,
+        name_last: str,
+        dataset: str = '0',
+):
+    name_first = name_first.strip().lower()
+    name_last = name_last.strip().lower()
+
+    select_cols = _DataSets.find_by_x_0 if dataset == '0' else []
+    sql = select(*select_cols)
+    if name_first and name_first != '*':
+        if '*' in name_first:
+            name_first = name_first.replace('*', '%')
+            sql = sql.where(t_player.c.name_first_lc.like(name_first))
+        else:
+            sql = sql.where(t_player.c.name_first_lc == name_first)
+    if name_last and name_last != '*':
+        if '*' in name_last:
+            name_last = name_last.replace('*', '%')
+            sql = sql.where(t_player.c.name_last_lc.like(name_last))
+        else:
+            sql = sql.where(t_player.c.name_last_lc == name_last)
+    sql = sql.limit(_max_rows)
+    with dbcon.begin():
+        result = dbcon.execute(sql)
+        players = [row._asdict() for row in result]
+    return players
 
 
 def find_top_players(
-    dbcon: sa.engine.Connection,
-    type: str = 'R',    # ratings type: R, RH, Q, QH
-    topn: int = -1,     # number of top players
-    rating_min: int = 0,
-    rating_max: int = 9999,
-    age_min: int = 0,
-    age_max: int = 99,
-    gender: str = '',
-    province: str = '',
-    last_played: str = '',
-    cfc_expiry_min: str = '',
-    row_to_dict=None,
+        dbcon: sa.engine.Connection,
+        type: str = 'R',    # ratings type: R, RH, Q, QH
+        topn: int = -1,     # number of top players
+        rating_min: int = 0,
+        rating_max: int = 9999,
+        age_min: int = 0,
+        age_max: int = 99,
+        gender: str = '',
+        province: str = '',
+        last_played: str = '',
+        cfc_expiry_min: str = '',
+        dataset: str = '0',
 ):
-    row_to_dict = row_to_dict or _r2d_top_players
     now = datetime.now()
     extras_for_nth_place_ties = 50
     en, fr = [], []
     rating_type = type.upper()
 
-    sql = select(*row_to_dict.get_cols())
+    select_cols = _DataSets.find_by_x_0 if dataset == '0' else []
+    sql = select(*select_cols)
     sql = sql.where(t_player.c.addr_province.not_in(['US', 'FO']))
     if topn > 0:
         en.append(f'Top {topn}')
@@ -94,6 +147,7 @@ def find_top_players(
             .select_from(t_crosstable.join(t_event, t_crosstable.c.event_id == t_event.c.id)) \
             .where(t_event.c.date_end >= last_played)
         sql = sql.where(t_player.c.cfc_id.in_(sq_last_played))
+    sql = sql.limit(_max_rows)
 
     description = {'en': ', '.join(en), 'fr': ', '.join(fr)}
     players = []
@@ -101,8 +155,9 @@ def find_top_players(
         # Must exclude extra players fetched if they have not tied for nth place
         prev_pos, prev_rating = -1, -1
         r_nth = 0
-        for n, row in enumerate(dbcon.execute(sql)):
-            player = row_to_dict.to_dict(row)
+        result = dbcon.execute(sql)
+        for n, row in enumerate(result):
+            player = row._asdict()
             players_rating = player['quick_rating'] if rating_type == 'Q' \
                 else player['regular_rating']
             if players_rating == prev_rating:
@@ -123,4 +178,4 @@ def find_top_players(
                 # Player is NOT tied for nth place: exclude
                 break   # since remaining players will also be != r_nth
 
-    return dict(description=description, players=players) #, sql=str(sql))
+    return dict(description=description, players=players)

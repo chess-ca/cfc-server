@@ -99,6 +99,20 @@ class RowToDataclass:
         return self._dataclass(**attributes)
 
 
+def dataset(*col_definitions):
+    columns = []
+    for cd in col_definitions:
+        if not isinstance(cd, (list, tuple,)):
+            columns.append(cd)
+        else:
+            include = cd[1] if isinstance(cd[1], (list, tuple)) \
+                else cd[1].split()
+            for name, col in cd[0].columns.items():
+                if name in include:
+                    columns.append(col)
+    return columns
+
+
 class VersionedSQLiteDB:
     """
 
@@ -108,9 +122,11 @@ class VersionedSQLiteDB:
     def __init__(self,
             directory: str,     # location of the .sqlite file and its state .ini file
             prefix: str,        # prefix in file name of the .sqlite and .ini files
+            echo: bool = False, # for create_engine(), for debugging.
     ):
         self.directory = directory
         self.prefix: str = prefix
+        self._echo = echo
         ini_file = pathlib.Path(directory, prefix + '.state.ini')
         if not ini_file.exists():
             raise FileNotFoundError(f'Versioned database: state file not found: {ini_file}')
@@ -149,7 +165,8 @@ class VersionedSQLiteDB:
         if v not in self.engines:
             url = 'sqlite:///{}/{}.{:04}.sqlite'.format(
                 self.directory, self.prefix, v)
-            self.engines[v] = {'engine': sa.create_engine(url, future=True)}
+            engine = sa.create_engine(url, future=True, echo=self._echo)
+            self.engines[v] = {'engine': engine}
         self.engines[v]['last_ref'] = now
         return self.engines[v]['engine']
 

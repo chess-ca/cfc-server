@@ -4,46 +4,50 @@ export function api_call(args) {
     const vars = args.vars || null;
     const file_obj = args.file_obj || null;
     const method = args.method || 'POST';
-    const onProgress = args.onProgress || default_onProgress;
-    const onComplete = args.onComplete || default_onComplete;
-    const onError = args.onError || default_onError;
-    const onAbort = args.onAbort || default_onAbort;
+    const onProgress = args.onProgress || null;
+    const onComplete = args.onComplete || null;
+    const onError = args.onError || null;
+    const onAbort = args.onAbort || null;
 
     const formdata = new FormData();
-    if (vars) {
+    if (vars !== null) {
         for (const key in vars) {
             if (vars.hasOwnProperty(key))
                 formdata.append(key, vars[key]);
         }
     }
-    if (file_obj) {
+    if (file_obj !== null) {
         formdata.append('upload_file', file_obj, file_obj.name);
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.upload.addEventListener('progress', onProgress, false);
-    xhr.addEventListener('load', onComplete, false);
-    xhr.addEventListener('error', onError, false);
-    xhr.addEventListener('abort', onAbort, false);
+    xhr.upload.addEventListener('progress', main_onProgress, false);
+    xhr.addEventListener('load', main_onComplete);
+    xhr.addEventListener('error', main_onError);
+    xhr.addEventListener('abort', main_onAbort);
     xhr.open(method, url);
 
-    console.log('API call:', method, url);
-    if (vars) console.log('\tVars:', vars);
-    if (file_obj) console.log('\tFile:', file_obj);
+    console.log('API: call:', method, url);
+    if (vars !== null) console.log('\tVars:', vars);
+    if (file_obj !== null) console.log('\tFile:', file_obj);
     xhr.send(formdata);
 
-    //-------- Default Handlers
-    function default_onProgress(event) {
+    //-------- Main Handlers
+    function main_onProgress(event) {
         const p = Math.floor(100 * event.loaded / event.total);
         console.log('File upload: progress:', p, '%');
+        if (onProgress !== null) onProgress(event);
     }
-    function default_onComplete(event) {
-        console.log('API call: loaded:', event.target.responseText);
+    function main_onComplete(event) {
+        console.log('API: Completed:', event.target.responseText);
+        if (onComplete !== null) onComplete(event);
     }
-    function default_onError(event) {
-        console.error('API call: error:', event)
+    function main_onError(event) {
+        console.error('API: Error:', event)
+        if (onError !== null) onError(event);
     }
-    function default_onAbort(event) {
-        console.log('API call: aborted');
+    function main_onAbort(event) {
+        console.log('API: Aborted:', event);
+        if (onAbort !== null) onAbort(event);
     }
 }

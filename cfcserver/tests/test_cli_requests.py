@@ -1,5 +1,5 @@
 
-import pathlib, sys, io, unittest, logging
+import pathlib, sys, io, unittest, logging, importlib
 from urllib.request import urlopen
 from urllib.parse import quote as url_quote
 
@@ -21,13 +21,23 @@ class TestAPIs(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def xtest_cfcdb_create(self):
-        with self.assertLogs('app') as ctx:
-            sys.argv = ['--local', '--dev', '--cli', 'cfcdb', '--job', str(root_path / 'app_local/jobs/test.cfcdb')]
-            import main     # importing will invoke the CLI
-            log_txt = '\n'.join(ctx.output)
-            self.assertTrue('JOB ENDED:' in log_txt)
+    # def test_cfcdb_create(self):
+    #     with self.assertLogs('cfcserver') as ctx:
+    #         sys.argv = ['--local', '--dev', '--cli', 'cfcdb', '--job', str(root_path / 'app_local/jobs/test.cfcdb')]
+    #         import main     # importing will invoke the CLI
+    #         log_txt = '\n'.join(ctx.output)
+    #         self.assertTrue('JOB ENDED:' in log_txt)
 
     def test_cfcdb_create(self):
         sys.argv = ['--local', '--dev', '--cli', 'cfcdb', '--job', str(root_path / 'app_local/jobs/test.cfcdb')]
-        import main     # importing will invoke the CLI
+        if 'main' not in sys.modules:
+            import main     # importing will invoke the CLI
+        else:
+            importlib.reload(sys.modules['main'])
+
+    def xtest_ratings_create(self):
+        sys.argv = ['--local', '--dev', '--cli', 'r', '--job', str(root_path / 'app_local/jobs/test.ratings')]
+        if 'main' not in sys.modules:
+            import main     # importing will invoke the CLI
+        else:
+            importlib.reload(sys.modules['main'])
