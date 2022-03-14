@@ -10,17 +10,20 @@ _log = logging.getLogger('cfcserver')
 
 def find_v1():
     class _API(pd.BaseModelPlus):
-        id: Optional[int] = None
+        ids: Optional[str] = None
         first: Optional[str] = None
         last: Optional[str] = None
+        sort: Optional[str] = ''
         csv: Optional[str] = None
 
     args, errs = _API.from_dict(flask.request.args.to_dict())
     if errs:
         rsp = dict(apicode=9, error=pd.simplify_errors(errs), players=[])
     else:
-        rsp = s_player.find(ids=args.id, name_first=args.first, name_last=args.last)
-        rsp = rsp | dict(apicode=0, error='')
+        rsp = s_player.find(ids=args.ids, name_first=args.first,
+            name_last=args.last, sort=args.sort)
+    rsp.setdefault('apicode', 0)
+    rsp.setdefault('error', '')
 
     if args.csv is None:
         return api_response(rsp)

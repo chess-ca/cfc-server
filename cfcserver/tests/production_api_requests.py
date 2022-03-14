@@ -1,19 +1,22 @@
 import json
-import pathlib, sys, unittest
+import pathlib, sys, unittest, ssl
 from urllib.request import urlopen
 from urllib.parse import quote as url_quote
 
-_hostname = 'http://127.0.0.1:5000'
+_hostname = 'https://server.chess.ca'
 _prefix = '/api/ratings'
 
 root_path = pathlib.Path(__file__).resolve().parents[2]
 # if str(root) not in sys.path:
 #     sys.path.insert(0, str(root))
+_ctx = ssl.create_default_context()
+_ctx.check_hostname = False
+_ctx.verify_mode = ssl.CERT_NONE
 
 class TestAPIs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        print('Testing APIs:')
+        print(f'**** PRODUCTION **** Testing APIs:')
 
     @classmethod
     def tearDownClass(cls):
@@ -23,7 +26,7 @@ class TestAPIs(unittest.TestCase):
     def test_v0_player(self):
         url = f'{_hostname}{_prefix}/player/101737'
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -32,7 +35,7 @@ class TestAPIs(unittest.TestCase):
     def test_v1_player(self):
         url = f'{_hostname}/api/player/v1/106488'
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             data = json.loads(rsp.read())
             self.assertIn('updated', data)
@@ -44,7 +47,7 @@ class TestAPIs(unittest.TestCase):
     def test_v0_player_find(self):
         url = f'{_hostname}{_prefix}/player/find?last=parakin'
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -53,7 +56,7 @@ class TestAPIs(unittest.TestCase):
     def test_v1_player_find_ids(self):
         url = f'{_hostname}/api/player/v1/find?ids=106488'
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             data = json.loads(rsp.read())
             self.assertIn('updated', data)
@@ -65,11 +68,12 @@ class TestAPIs(unittest.TestCase):
             data = json.loads(rsp.read())
             self.assertIn('updated', data)
             self.assertIn('players', data)
+            print('****', data)
 
     def test_v1_player_find_names(self):
         url = f'{_hostname}/api/player/v1/find?first={url_quote("d*")}&last={url_quote("para*")}'
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             data = json.loads(rsp.read())
             self.assertIn('updated', data)
@@ -80,7 +84,7 @@ class TestAPIs(unittest.TestCase):
         url = f'{_hostname}/api/cfcdb/player/v1/top'
         url += '?topn=50&type=R&province=ON&age_min=8&age_max=18'
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -91,7 +95,7 @@ class TestAPIs(unittest.TestCase):
         url = f'{_hostname}/api/player/v1/top'
         url += '?topn=50&type=R&province=ON&age_min=8&age_max=18'
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -102,7 +106,7 @@ class TestAPIs(unittest.TestCase):
     def test_v0_tournament(self):
         url = f'{_hostname}{_prefix}/tournament/202001035'
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -121,21 +125,14 @@ class TestAPIs(unittest.TestCase):
     def test_v0_tournament_find(self):
         url = f'{_hostname}{_prefix}/tournament/find?name='+url_quote('*hart house*')
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
             self.assertIn(b'Hart House Reading Week Crown', body)
 
     def test_v1_event_find(self):
-        url = f'{_hostname}/api/event/v1/find?n='+url_quote('Hart House')
-        print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
-            self.assertEqual(rsp.status, 200)
-            body = rsp.read()
-            self.assertIn(b'apicode', body)
-            self.assertIn(b'Hart House Reading Week Crown', body)
-        url = f'{_hostname}/api/event/v1/find?n='+url_quote('*Hart House   * ')
+        url = f'{_hostname}/api/event/v1/find?n='+url_quote('*hart house*')
         print(f'... API: v1: {url}')
         with urlopen(url, timeout=3) as rsp:
             self.assertEqual(rsp.status, 200)
@@ -147,7 +144,7 @@ class TestAPIs(unittest.TestCase):
     def test_v0_tournament_days(self):
         url = f'{_hostname}{_prefix}/tournament/days/60'
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -157,7 +154,7 @@ class TestAPIs(unittest.TestCase):
     def test_v0_tournament_year(self):
         url = f'{_hostname}{_prefix}/tournament/year/2020'
         print(f'... API: v0: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)

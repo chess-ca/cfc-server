@@ -11,22 +11,24 @@ def find(
     ids: Optional[str] = None,
     name_first: Optional[str] = None,
     name_last: Optional[str] = None,
+    sort: Optional[str] = '',
 ):
     rsp: dict[str, Any] = {}
     with AppConfig.CFCDB.connect() as dbcon:
         rsp['updated'] = gw_meta.get_key(dbcon, 'updated_text')
         if ids is not None:
             ids = [str_to_int(i, if_bad=-1) for i in ids.split(',')]
-            rsp['players'] = gw_player.find_by_ids(dbcon, ids)
+            players = gw_player.find_by_ids(dbcon, ids, sort=sort)
         elif name_first is not None or name_last is not None:
-            rsp['players'] = gw_player.find_by_names(dbcon, name_first, name_last)
+            players = gw_player.find_by_names(dbcon, name_first, name_last)
         else:
-            rsp['players'] = []
+            players = []
+        rsp['players'] = players
     return rsp
 
 
 def get_details(cfc_id: str) -> dict:
-    cfc_id = str_to_int(str(cfc_id).strip(), if_bad=-1)
+    cfc_id = str_to_int(str(cfc_id), if_bad=-1)
     rsp: dict[str, Any] = {}
     with AppConfig.CFCDB.connect() as dbcon:
         rsp['updated'] = gw_meta.get_key(dbcon, 'updated_text')
@@ -44,7 +46,8 @@ def get_details(cfc_id: str) -> dict:
             is_org = is_org or (e['organizer_id'] == cfc_id)
             is_arb = is_arb or (e['arbiter_id'] == cfc_id)
             if is_org and is_arb: break
-        rsp['player']['roles'] = {'organizer': is_org, 'arbiter': is_arb}
+        rsp['player']['is_organizer'] = is_org
+        rsp['player']['is_arbiter'] = is_arb
     return rsp
 
 

@@ -3,14 +3,14 @@ from datetime import datetime
 import sqlalchemy as sa
 from sqlalchemy.future import select
 from sqlalchemy.sql import between
-from codeboy4py.db.sqlalchemy import dataset
+from codeboy4py.db.sqlalchemy import column_set
 from .schema import t_player, t_event, t_crosstable
 
-_max_rows = 500
+_max_rows = 1000
 
 
-class _DataSets:
-    find_by_x_0 = dataset(
+class _ColumnSets:
+    find_by_x_0 = column_set(
         (t_player, 'cfc_id cfc_expiry fide_id name_first name_last addr_city addr_province'
                    ' regular_rating regular_indicator quick_rating quick_indicator'),
     )
@@ -19,14 +19,21 @@ class _DataSets:
 def find_by_ids(
         dbcon: sa.engine.Connection,
         ids: list[int],
+        sort: str = '',
         dataset: str = '0',
 ):
-    select_cols = _DataSets.find_by_x_0 if dataset == '0' else []
+    select_cols = _ColumnSets.find_by_x_0 if dataset == '0' else []
     sql = (
         select(*select_cols)
         .where(t_player.c.cfc_id.in_(ids))
         .limit(_max_rows)
     )
+    if sort == 'rr':
+        sql = sql.order_by(t_player.c.regular_rating.desc(), t_player.c.name_last, t_player.c.name_first)
+    elif sort == 'qr':
+        sql = sql.order_by(t_player.c.quick_rating.desc(), t_player.c.name_last, t_player.c.name_first)
+    else:
+        sql = sql.order_by(t_player.c.name_last, t_player.c.name_first)
     with dbcon.begin():
         result = dbcon.execute(sql)
         players = [row._asdict() for row in result]
@@ -42,7 +49,7 @@ def find_by_names(
     name_first = name_first.strip().lower()
     name_last = name_last.strip().lower()
 
-    select_cols = _DataSets.find_by_x_0 if dataset == '0' else []
+    select_cols = _ColumnSets.find_by_x_0 if dataset == '0' else []
     sql = select(*select_cols)
     if name_first and name_first != '*':
         if '*' in name_first:
@@ -82,7 +89,7 @@ def find_top_players(
     en, fr = [], []
     rating_type = type.upper()
 
-    select_cols = _DataSets.find_by_x_0 if dataset == '0' else []
+    select_cols = _ColumnSets.find_by_x_0 if dataset == '0' else []
     sql = select(*select_cols)
     sql = sql.where(t_player.c.addr_province.not_in(['US', 'FO']))
     if topn > 0:

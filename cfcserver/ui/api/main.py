@@ -7,9 +7,8 @@ _routing_rules = (
     # -------- v0 APIs (deprecating)
     ('SET_URL_PREFIX', '/api/ratings'),
     ('SET_IMPORT_PREFIX', 'cfcserver.ui.api.ratings.'),
-    ('/player/find', 'player.find'),                        # TODO: After v1.1: Remove
-    # ('/player/prov/<prov>', 'player.province'),
-    ('/player/<int:mid>', 'player.get_details'),
+    ('/player/find', 'player.find'),                        # TODO: DELETE-ME-NOW
+    ('/player/<int:mid>', 'player.get_details'),            # TODO: DELETE-ME-NOW
     ('/tournament/<int:tid>', 'tournament.get_details'),
     ('/tournament/find', 'tournament.find'),
     ('/tournament/days/<int:days>', 'tournament.days'),
@@ -21,9 +20,9 @@ _routing_rules = (
     ('/player/v1/find', 'player.find_v1'),
     ('/player/v1/<cfc_id>', 'player.get_details_v1'),
     ('/player/v1/top', 'player.find_top_players_v1'),
-    ('/cfcdb/player/v1/top', 'player.find_top_players_v1', ['GET'], 'old_top_players'),  # TODO: After v1.1: Remove
-    # ('/event/v1/find', 'event.find_v1'),
-    # ('/event/v1/<event_id>', 'event.get_crosstable_v1'),
+    ('/event/v1/find', 'event.find_v1'),
+    ('/event/v1/<event_id>', 'event.get_details_v1'),
+    ('/cfcdb/player/v1/top', 'player.find_top_players_v1', ['GET'], 'old_top_players'),  # TODO: DELETE-ME-NOW
 )
 
 
