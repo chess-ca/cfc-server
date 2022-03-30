@@ -63,6 +63,7 @@ def find_by_names(
             sql = sql.where(t_player.c.name_last_lc.like(name_last))
         else:
             sql = sql.where(t_player.c.name_last_lc == name_last)
+    sql = sql.order_by(t_player.c.name_last, t_player.c.name_first)
     sql = sql.limit(_max_rows)
     with dbcon.begin():
         result = dbcon.execute(sql)
