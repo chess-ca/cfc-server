@@ -10,8 +10,6 @@ def initialize(app_config_file):
     _logging_setup()
 
     # @@@@@@@@@@@@@@@@@@@@@@@@ TODO: Deprecate
-    from . import dao as app_dao
-    AppConfig.dao = app_dao
     setattr(AppConfig.RATINGS_DB, 'db_directory', AppConfig.DATA_DIR + '/ratings')
 
 

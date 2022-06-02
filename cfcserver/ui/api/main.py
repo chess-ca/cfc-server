@@ -4,16 +4,6 @@ from flask_cors import CORS
 import codeboy4py.flask.routing as cb4py_routing
 
 _routing_rules = (
-    # -------- v0 APIs (deprecating)
-    ('SET_URL_PREFIX', '/api/ratings'),
-    ('SET_IMPORT_PREFIX', 'cfcserver.ui.api.ratings.'),
-    ('/player/find', 'player.find'),                        # TODO: DELETE-ME-NOW
-    ('/player/<int:mid>', 'player.get_details'),            # TODO: DELETE-ME-NOW
-    ('/tournament/<int:tid>', 'tournament.get_details'),
-    ('/tournament/find', 'tournament.find'),
-    ('/tournament/days/<int:days>', 'tournament.days'),
-    ('/tournament/year/<int:year>', 'tournament.year'),
-
     # -------- v1 APIs
     ('SET_URL_PREFIX', '/api'),
     ('SET_IMPORT_PREFIX', 'cfcserver.ui.api.'),
@@ -22,7 +12,6 @@ _routing_rules = (
     ('/player/v1/top', 'player.find_top_players_v1'),
     ('/event/v1/find', 'event.find_v1'),
     ('/event/v1/<event_id>', 'event.get_details_v1'),
-    ('/cfcdb/player/v1/top', 'player.find_top_players_v1', ['GET'], 'old_top_players'),  # TODO: DELETE-ME-NOW
 )
 
 

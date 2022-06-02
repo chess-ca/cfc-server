@@ -34,11 +34,6 @@ class AppConfig(AppConfigBase):
     STATIC_BUILT_URL: str = '/static/built.unset/{}'
     PYTZ_TIMEZONE = 'Canada/Eastern'
 
-    # @@@@@@@@@@@@@@@@@@@ TODO: V2-Deprecate
-    dao = None
-    models = None
-    services = None
-
     # @@@@@@@@@@@@@@@@@@@ TODO: Deprecate
     class RATINGS_DB(cb4py_db.VersionedSqliteDB):
         db_prefix = 'ratings'

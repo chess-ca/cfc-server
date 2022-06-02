@@ -19,7 +19,6 @@ def find_v1():
         rsp = s_event.find(name=args.n, province=args.p, year=args.y, days=args.d)
         rsp.setdefault('apicode', 0)
         rsp.setdefault('error', '')
-        print('okay:', args.n, 'rsp:', rsp)
     return api_response(rsp)
 
 

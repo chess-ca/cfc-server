@@ -63,7 +63,7 @@ class TestAPIs(unittest.TestCase):
             self.assertIn('players', data)
         url = f'{_hostname}/api/player/v1/find?ids=106488,108202,103201&sort=rr'
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             data = json.loads(rsp.read())
             self.assertIn('updated', data)
@@ -115,7 +115,7 @@ class TestAPIs(unittest.TestCase):
     def test_v1_event(self):
         url = f'{_hostname}/api/event/v1/202001035'
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
@@ -134,7 +134,7 @@ class TestAPIs(unittest.TestCase):
     def test_v1_event_find(self):
         url = f'{_hostname}/api/event/v1/find?n='+url_quote('*hart house*')
         print(f'... API: v1: {url}')
-        with urlopen(url, timeout=3) as rsp:
+        with urlopen(url, timeout=3, context=_ctx) as rsp:
             self.assertEqual(rsp.status, 200)
             body = rsp.read()
             self.assertIn(b'apicode', body)
