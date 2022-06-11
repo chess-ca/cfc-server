@@ -14,9 +14,6 @@ def run():
         error = s_jobs.run_job(args.job)
         if error:
             sys.exit(error)
-    elif args.action == 'r':
-        from cfcserver.services import ratings_create_db
-        ratings_create_db.create(args.job)
     elif args.action == 'cfcdb':
         from cfcserver.services import cfcdb as s_cfcdb
         s_cfcdb.create(args.job)

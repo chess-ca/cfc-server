@@ -10,6 +10,7 @@ root_path = pathlib.Path(__file__).resolve().parents[2]
 # if str(root) not in sys.path:
 #     sys.path.insert(0, str(root))
 
+
 class TestAPIs(unittest.TestCase):
     log_file = io.StringIO()
 
@@ -30,13 +31,6 @@ class TestAPIs(unittest.TestCase):
 
     def test_cfcdb_create(self):
         sys.argv = ['--local', '--dev', '--cli', 'cfcdb', '--job', str(root_path / 'app_local/jobs/test.cfcdb')]
-        if 'main' not in sys.modules:
-            import main     # importing will invoke the CLI
-        else:
-            importlib.reload(sys.modules['main'])
-
-    def xtest_ratings_create(self):
-        sys.argv = ['--local', '--dev', '--cli', 'r', '--job', str(root_path / 'app_local/jobs/test.ratings')]
         if 'main' not in sys.modules:
             import main     # importing will invoke the CLI
         else:

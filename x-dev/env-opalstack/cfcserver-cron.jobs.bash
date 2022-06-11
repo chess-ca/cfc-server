@@ -1,7 +1,14 @@
 #!/bin/bash
 #-----------------------------------------------------------------------
 # CFC Server Cron Job:
+# - Looks in directory ${APP_LOCAL}/jobs/** for a existence of a
+#   job status indicator file:
+#   - "job.runnable" - Indicates the job is waiting to run.
+#   - "job.running" - Indicates the job is either now running or has
+#     failed/crashed. Rename this file to retry the job.
+#   - "job.ended" - The job has ended successfully.
 #-----------------------------------------------------------------------
+# set so if any job step fails this script will end (with "job.running")
 set -euo pipefail
 
 readonly APP_ROOT="/home/don/apps/cfc_server"

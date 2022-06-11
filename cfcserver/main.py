@@ -9,9 +9,6 @@ def initialize(app_config_file):
     gateways.initialize(AppConfig)
     _logging_setup()
 
-    # @@@@@@@@@@@@@@@@@@@@@@@@ TODO: Deprecate
-    setattr(AppConfig.RATINGS_DB, 'db_directory', AppConfig.DATA_DIR + '/ratings')
-
 
 def _logging_setup():
     log = logging.getLogger('cfcserver')

@@ -42,3 +42,10 @@ def get_built_url_format():
     s = re.search(pattern, built_config)
     built_dir = s.group(1) if s else 'NOT_SET'
     return f'/static/{built_dir}/{{}}'
+
+
+def api_response(data):
+    ro = flask.make_response(data)
+    ro.access_control_allow_origin = '*'
+    ro.headers.add('Server', 'cfc-server')
+    return ro

@@ -34,11 +34,6 @@ class AppConfig(AppConfigBase):
     STATIC_BUILT_URL: str = '/static/built.unset/{}'
     PYTZ_TIMEZONE = 'Canada/Eastern'
 
-    # @@@@@@@@@@@@@@@@@@@ TODO: Deprecate
-    class RATINGS_DB(cb4py_db.VersionedSqliteDB):
-        db_prefix = 'ratings'
-        db_directory = None     # set in initialize()
-
     @classmethod
     def init_appconfig(cls, app_config_file):
         cls.init_logger('cfcserver', level='DEBUG')
