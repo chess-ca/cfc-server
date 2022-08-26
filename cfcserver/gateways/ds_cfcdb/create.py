@@ -33,7 +33,8 @@ def members_load_from_csv_file(dbcon, csv_f: typing.TextIO):
             cfc_id=int(row['cfc_id']),
             cfc_expiry=str(row['cfc_expiry']),
             cfc_type=str(row['cfc_type']),
-            gomembership_id=str(row['gomembership_id']),
+            # FYI: 2022-08: CFC-Tools changed names from GoMembership to JustGo
+            gomembership_id=str(row['justgo_id']),
             fide_id=int(row['fide_id']),
             name_first=str(row['name_first']),
             name_first_lc=str(row['name_first']).lower(),
